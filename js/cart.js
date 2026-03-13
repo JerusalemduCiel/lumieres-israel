@@ -70,16 +70,36 @@ function updateCartDisplay() {
 // Mettre à jour le total
 function updateCartTotal() {
     const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
-    const shipping = subtotal >= 50 ? 0 : 5.90;
-    const total = subtotal + shipping;
+    // Total = subtotal uniquement (frais de port calculés par Stripe)
+    const total = subtotal;
     
     const subtotalEl = document.querySelector('.subtotal-amount');
     const shippingEl = document.querySelector('.shipping-amount');
     const totalEl = document.querySelector('.total-amount');
     
+    // Masquer la ligne frais de port si elle existe
+    if (shippingEl) {
+        const shippingRow = shippingEl.closest('.shipping-row, .summary-line');
+        if (shippingRow) {
+            shippingRow.style.display = 'none';
+        } else {
+            shippingEl.style.display = 'none';
+        }
+    }
+    
     if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
-    if (shippingEl) shippingEl.textContent = shipping === 0 ? 'Offerte' : formatPrice(shipping);
-    if (totalEl) totalEl.textContent = formatPrice(total);
+    if (totalEl) {
+        totalEl.textContent = formatPrice(total);
+        
+        // Ajouter la mention discrète sous le total si elle n'existe pas déjà
+        if (!document.querySelector('.shipping-notice')) {
+            const notice = document.createElement('p');
+            notice.className = 'shipping-notice';
+            notice.style.cssText = 'font-size:0.8rem; color:#888; text-align:center; margin:5px 0';
+            notice.textContent = '🚚 Frais de port calculés à la commande';
+            totalEl.parentElement.appendChild(notice);
+        }
+    }
 }
 
 // Formater le prix
