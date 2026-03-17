@@ -94,12 +94,13 @@ exports.handler = async (event) => {
       success_url: `${process.env.URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.URL}/#boutique`,
       customer_email: customerInfo.email,
-      shipping_address_collection: {
-        allowed_countries: ['FR']
-      },
       metadata: {
         customer_name: customerInfo.name,
+        customer_email: customerInfo.email,
         customer_phone: customerInfo.phone,
+        customer_address: customerInfo.address || '',
+        customer_city: customerInfo.city || '',
+        customer_zip: customerInfo.postal || customerInfo.zip || '',
         total_weight: totalWeight.toFixed(2),
         shipping_cost: shippingCost.toFixed(2)
       }

@@ -38,13 +38,9 @@ exports.handler = async (event) => {
     const customerName = session.metadata?.customer_name || 'Client';
     const customerEmail = session.customer_email;
     const customerPhone = session.metadata?.customer_phone || '';
-    const shippingAddress = session.shipping_details?.address;
-    const customerAddress = session.customer_details?.address;
-    const adresse = shippingAddress
-      ? `${shippingAddress.line1 || ''}, ${shippingAddress.city || ''} ${shippingAddress.postal_code || ''}, ${shippingAddress.country || ''}`
-      : customerAddress
-      ? `${customerAddress.line1 || ''}, ${customerAddress.city || ''} ${customerAddress.postal_code || ''}, ${customerAddress.country || ''}`
-      : session.metadata?.customer_address || 'Adresse non renseignée';
+    const adresse = `${session.metadata?.customer_address || ''}, 
+  ${session.metadata?.customer_city || ''} 
+  ${session.metadata?.customer_zip || ''}`.trim();
     const amount = (session.amount_total / 100).toFixed(2);
     const sessionId = session.id;
 
