@@ -1779,7 +1779,7 @@
                 <input type="text" name="address" id="customer-address" placeholder="Adresse *" autocomplete="street-address" required>
                 <input type="text" name="city" id="customer-city" placeholder="Ville *" autocomplete="address-level2" required>
                 <input type="text" name="postal" id="customer-zip" placeholder="Code postal *" autocomplete="postal-code" required>
-                <select name="country" autocomplete="country" required>
+                <select name="country" id="customer-country" autocomplete="country" required>
                     <option value="">Pays *</option>
                     <option value="FR">France</option>
                     <option value="BE">Belgique</option>
@@ -3256,7 +3256,8 @@
                     'customer-phone': '0618061000',
                     'customer-address': '27 boulevard des belges',
                     'customer-city': 'Lyon',
-                    'customer-zip': '69006'
+                    'customer-zip': '69006',
+                    'customer-country': 'FR'
                 };
                 Object.entries(devData).forEach(([id, val]) => {
                     const el = document.getElementById(id);
