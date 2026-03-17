@@ -1869,11 +1869,18 @@ img {
 .showcase .product-card img,
 .showcase-grid .product-card img,
 #acte2 .product-card img,
-#acte-2 .jeu-visual img,
-#acte-2 .jeu-frame img {
+#acte-2 .jeu-visual img {
   width: 100% !important;
   height: 280px !important;
   object-fit: contain !important;
+  display: block !important;
+}
+
+#acte-2 .jeu-frame img {
+  width: 100% !important;
+  height: 280px !important;
+  object-fit: cover !important;
+  object-position: center center !important;
   display: block !important;
 }
 
