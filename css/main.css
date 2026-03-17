@@ -4212,6 +4212,18 @@ textarea[name="message"],
     margin: 0 auto;
 }
 
+/* Boutique : hauteur d'image uniforme pour toutes les cartes produits */
+#boutique .product-card .product-image {
+    height: 220px;
+    min-height: 220px;
+    aspect-ratio: unset;
+}
+#boutique .product-card .product-image img {
+    height: 220px;
+    width: 100%;
+    object-fit: contain;
+}
+
 /* Badge Best-seller / Nouveauté */
 .badge {
     position: absolute;
