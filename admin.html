@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin — Ora Shel Torah</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -256,6 +257,7 @@
         </div>
       </div>
       <button type="submit" class="btn-send" id="btn-send">Envoyer email de suivi</button>
+      <button type="button" class="btn-send" id="btn-generate-label" style="margin-left: 8px;">Générer étiquette colis</button>
     </form>
 
     <p class="msg-success" id="msg-success">Email de suivi envoyé avec succès.</p>
@@ -322,6 +324,86 @@
         preview.style.display = 'block';
       } else {
         preview.style.display = 'none';
+      }
+    });
+
+    // Génération étiquette colis (PDF A6) avec jsPDF
+    const btnGenerateLabel = document.getElementById('btn-generate-label');
+    btnGenerateLabel.addEventListener('click', function() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const urlName = params.get('name') || '';
+        const urlAddress = params.get('address') || '';
+        const urlPostal = params.get('postal') || '';
+        const urlCity = params.get('city') || '';
+
+        const destName = urlName || document.getElementById('client-name').value.trim();
+        const destAddress = urlAddress || '';
+        const destPostalCity = (urlPostal + ' ' + urlCity).trim();
+
+        const { jsPDF } = window.jspdf || {};
+        if (!jsPDF) {
+          alert('Erreur : jsPDF non chargé.');
+          return;
+        }
+
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a6' });
+
+        // Expéditeur
+        doc.setLineWidth(0.4);
+        doc.rect(8, 8, 89, 40);
+        doc.setFontSize(12);
+        doc.text('EXPÉDITEUR', 10, 14);
+        doc.setFontSize(11);
+        const senderLines = [
+          'Ora Shel Torah',
+          'Michael Lumbroso',
+          '27 Boulevard des Belges',
+          '69006 LYON',
+          'France'
+        ];
+        let y = 20;
+        senderLines.forEach(line => {
+          doc.text(line, 10, y);
+          y += 5;
+        });
+
+        // Destinataire
+        doc.rect(8, 52, 89, 60);
+        doc.setFontSize(12);
+        doc.text('DESTINATAIRE', 10, 58);
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'bold');
+        doc.text(destName || 'Destinataire', 10, 66);
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        y = 74;
+        if (destAddress) {
+          doc.text(destAddress, 10, y);
+          y += 6;
+        }
+        if (destPostalCity) {
+          doc.text(destPostalCity, 10, y);
+          y += 6;
+        }
+        doc.text('France', 10, y);
+
+        // Produit / poids
+        y += 10;
+        doc.setFontSize(12);
+        doc.text('Produit : La Parole Transmise — Lumières d\'Israël', 10, y);
+        y += 6;
+        doc.text('Poids : 0,5 kg', 10, y);
+
+        // Mention livraison
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('LIVRAISON EN BOÎTE AUX LETTRES', 10, 140);
+
+        doc.save('etiquette-colis-laposte.pdf');
+      } catch (e) {
+        console.error('Erreur génération étiquette:', e);
+        alert('Erreur lors de la génération de l\'étiquette.');
       }
     });
 
