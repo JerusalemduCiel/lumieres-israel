@@ -1358,9 +1358,11 @@ img {
   }
 
   .jeu-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+    width: 100% !important;
+    height: 280px !important;
+    object-fit: contain !important;
+    display: block !important;
+    max-height: 280px !important;
   }
 
   .jeu-info {
@@ -1478,11 +1480,11 @@ img {
   }
 
   .jeu-frame img {
-    max-height: 260px;
-    max-width: 160px;
-    width: auto;
-    height: auto;
-    object-fit: contain;
+    width: 100% !important;
+    height: 280px !important;
+    object-fit: contain !important;
+    display: block !important;
+    max-height: 280px !important;
   }
 
   .jeu-info {
@@ -1601,21 +1603,12 @@ img {
   }
 
   /* Image compacte */
-  .jeu-slide img,
-  .jeu-card img {
-    max-height: 320px !important;
-    width: auto !important;
-    object-fit: contain !important;
-  }
-  
-  .jeu-frame img,
-  .jeu-visual img {
-    max-height: 320px !important;
-    max-width: 280px !important;
-    width: auto !important;
-    height: auto !important;
+  .jeu-frame img {
+    width: 100% !important;
+    height: 280px !important;
     object-fit: contain !important;
     display: block !important;
+    max-height: 280px !important;
   }
 
   /* Conteneur jeu-visual */
@@ -1849,10 +1842,23 @@ img {
 }
 
 .jeu-frame img {
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
+  width: 100% !important;
+  height: 280px !important;
+  object-fit: contain !important;
+  display: block !important;
+  max-height: 280px !important;
+}
+
+/* Showcase / Acte 2 - images des 3 cartes à hauteur fixe */
+.showcase .product-card img,
+.showcase-grid .product-card img,
+#acte2 .product-card img,
+#acte-2 .jeu-visual img,
+#acte-2 .jeu-frame img {
+  width: 100% !important;
+  height: 280px !important;
+  object-fit: contain !important;
+  display: block !important;
 }
 
 /* Info - Texte à droite ÉPURÉ */
