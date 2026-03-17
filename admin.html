@@ -272,6 +272,25 @@
         dashboard.classList.add('visible');
         document.body.classList.add('dashboard-visible');
         passwordInput.value = '';
+        // Lire les paramètres URL et pré-remplir le formulaire
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('name')) {
+          document.getElementById('client-name').value = params.get('name') || '';
+          document.getElementById('client-email').value = params.get('email') || '';
+          document.getElementById('ref').value = params.get('session') || '';
+          const productSelect = document.getElementById('product');
+          const productParam = params.get('product') || '';
+          for (let opt of productSelect.options) {
+            if (opt.value && (opt.value.includes(productParam) || productParam.includes(opt.value))) {
+              opt.selected = true;
+              break;
+            }
+          }
+          const banner = document.createElement('div');
+          banner.style.cssText = 'background:#d4edda; color:#155724; padding:12px; border-radius:6px; margin-bottom:20px;';
+          banner.innerHTML = '✅ Commande chargée automatiquement depuis l\'email de confirmation.';
+          document.getElementById('dashboard').prepend(banner);
+        }
       } else {
         loginError.classList.add('visible');
       }

@@ -67,6 +67,13 @@ exports.handler = async (event) => {
     console.log('Résultat email client:', JSON.stringify(clientResult));
 
     // EMAIL ADMIN
+    const dashboardUrl = `https://orasheltorah.fr/admin.html?` +
+      `name=${encodeURIComponent(customerName)}&` +
+      `email=${encodeURIComponent(customerEmail)}&` +
+      `phone=${encodeURIComponent(customerPhone)}&` +
+      `address=${encodeURIComponent(adresse)}&` +
+      `product=${encodeURIComponent(session.metadata?.product_name || 'La Parole Transmise')}&` +
+      `session=${encodeURIComponent(sessionId)}`;
     console.log('Envoi email admin à: mlumbroso68@gmail.com');
     const adminResult = await sendEmail(
       'mlumbroso68@gmail.com',
@@ -83,7 +90,7 @@ exports.handler = async (event) => {
           <tr><td><strong>Référence :</strong></td><td>${sessionId}</td></tr>
         </table>
         <div style="margin-top:20px; text-align:center;">
-          <a href="https://orasheltorah.fr/admin.html" style="background:#eda234; color:#0f1419; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:16px;">📦 Accéder au dashboard commandes</a>
+          <a href="${dashboardUrl}" style="background:#eda234; color:#0f1419; padding:12px 24px; border-radius:6px; text-decoration:none; font-weight:bold; font-size:16px;">📦 Accéder au dashboard commandes</a>
         </div>
       </div>
       `
