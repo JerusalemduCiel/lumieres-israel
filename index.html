@@ -1773,12 +1773,12 @@
             <form id="checkout-form">
                 <h3>Informations de livraison</h3>
                 
-                <input type="text" name="name" placeholder="Nom complet *" required>
-                <input type="email" name="email" placeholder="Email *" required>
-                <input type="tel" name="phone" placeholder="Téléphone *" required>
-                <input type="text" name="address" placeholder="Adresse *" required>
-                <input type="text" name="city" placeholder="Ville *" required>
-                <input type="text" name="postal" placeholder="Code postal *" required>
+                <input type="text" name="name" id="customer-name" placeholder="Nom complet *" required>
+                <input type="email" name="email" id="customer-email" placeholder="Email *" required>
+                <input type="tel" name="phone" id="customer-phone" placeholder="Téléphone *" required>
+                <input type="text" name="address" id="customer-address" placeholder="Adresse *" required>
+                <input type="text" name="city" id="customer-city" placeholder="Ville *" required>
+                <input type="text" name="postal" id="customer-zip" placeholder="Code postal *" required>
                 <select name="country" required>
                     <option value="">Pays *</option>
                     <option value="FR">France</option>
@@ -3247,6 +3247,22 @@
         // Gérer la soumission du formulaire de checkout
         const checkoutForm = document.getElementById('checkout-form');
         if (checkoutForm) {
+            // Pré-remplissage automatique en dev uniquement
+            if (window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1') {
+                const devData = {
+                    'customer-name': 'Michael Lumbroso',
+                    'customer-email': 'mlumbroso68@gmail.com',
+                    'customer-phone': '0618061000',
+                    'customer-address': '27 boulevard des belges',
+                    'customer-city': 'Lyon',
+                    'customer-zip': '69006'
+                };
+                Object.entries(devData).forEach(([id, val]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                });
+            }
             checkoutForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
