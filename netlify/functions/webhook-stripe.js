@@ -45,7 +45,8 @@ exports.handler = async (event) => {
     const sessionId = session.id;
 
     // EMAIL CLIENT
-    await sendEmail(
+    console.log('Envoi email client à:', customerEmail);
+    const clientResult = await sendEmail(
       customerEmail,
       '✅ Votre commande Ora Shel Torah est confirmée !',
       `
@@ -63,9 +64,11 @@ exports.handler = async (event) => {
       </div>
       `
     );
+    console.log('Résultat email client:', JSON.stringify(clientResult));
 
     // EMAIL ADMIN
-    await sendEmail(
+    console.log('Envoi email admin à: mlumbroso68@gmail.com');
+    const adminResult = await sendEmail(
       'mlumbroso68@gmail.com',
       `🛒 Nouvelle commande — ${customerName} — ${amount} €`,
       `
@@ -82,6 +85,7 @@ exports.handler = async (event) => {
       </div>
       `
     );
+    console.log('Résultat email admin:', JSON.stringify(adminResult));
   }
 
   return { statusCode: 200, body: JSON.stringify({ received: true }) };
