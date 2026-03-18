@@ -1076,3 +1076,52 @@ img {
 /* ============================================================
    FIN DU FICHIER
    ============================================================ */
+
+@media (max-width: 500px) {
+    #acte-2 .jeu-slide {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        padding: 20px 10px !important;
+        min-height: auto !important;
+    }
+
+    #acte-2 .jeu-visual,
+    #acte-2 .jeu-frame {
+        width: 50% !important;
+        max-width: 160px !important;
+        height: auto !important;
+        margin: 0 auto 15px !important;
+        float: none !important;
+    }
+
+    #acte-2 .jeu-visual img,
+    #acte-2 .jeu-frame img {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 200px !important;
+        object-fit: contain !important;
+    }
+
+    #acte-2 .jeu-info {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 5px !important;
+        text-align: center !important;
+        float: none !important;
+    }
+
+    #acte-2 .jeu-title {
+        font-size: 1.2rem !important;
+        text-align: center !important;
+        width: 100% !important;
+        word-wrap: break-word !important;
+    }
+
+    #acte-2 .jeu-tagline {
+        font-size: 0.8rem !important;
+        text-align: center !important;
+        width: 100% !important;
+        word-wrap: break-word !important;
+    }
+}
