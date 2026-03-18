@@ -499,6 +499,26 @@ img {
         visibility: visible !important;
     }
     
+    #acte-2 .jeu-frame img {
+        width: 100% !important;
+        height: 280px !important;
+        max-width: 100% !important;
+        object-fit: cover !important;
+        object-position: center center !important;
+    }
+    
+    #acte-2 .jeu-frame {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 280px !important;
+    }
+    
+    #acte-2 .jeu-visual {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 280px !important;
+    }
+    
     /* Infos jeu - FORCER affichage */
     .jeu-info {
         width: 100% !important;
@@ -1008,12 +1028,7 @@ img {
         transform: none !important;
         will-change: auto !important;
     }
-
-    .jeu-slide {
-        min-height: 400px !important;
-        padding: 20px 10px !important;
-    }
-
+    
 }
 
 /* ============================================================
