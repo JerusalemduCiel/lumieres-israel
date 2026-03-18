@@ -1031,6 +1031,18 @@ img {
     
 }
 
+/* FIX FOLD - Titre acte 2 uniquement */
+@media screen and (max-width: 430px) {
+    .jeux-showcase > .section-title {
+        font-size: 1.1rem !important;
+        line-height: 1.3 !important;
+        padding: 0 10px !important;
+        text-align: center !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+}
+
 /* ============================================================
    FIN DU FICHIER
    ============================================================ */
