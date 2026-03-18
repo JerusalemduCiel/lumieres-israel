@@ -802,6 +802,24 @@ img {
     .author-info span {
         font-size: 0.7rem !important;
     }
+
+    .testimonial-card {
+        width: calc(100vw - 40px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    .stat-card {
+        width: calc(100vw - 40px) !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    .testimonials-grid,
+    .stats-grid {
+        padding: 0 !important;
+        width: 100% !important;
+    }
     
 }
 
