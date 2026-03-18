@@ -735,6 +735,28 @@ img {
         flex: none !important;
         text-align: center !important;
     }
+
+    .hero-bis-content {
+        text-align: center !important;
+        align-items: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 90% !important;
+        max-width: 400px !important;
+        margin: 0 auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+
+    .hero-bis-content .btn-discover,
+    .hero-bis-content .btn-primary,
+    .hero-bis-content a,
+    .hero-bis-content button {
+        align-self: center !important;
+        text-align: center !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
     
 }
 
