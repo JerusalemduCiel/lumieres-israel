@@ -353,6 +353,9 @@ function initJeuxShowcase() {
     let currentX = 0;
 
     const touchStartHandler = (e) => {
+        if (e.target.closest('.btn-discover, a, button:not(.slider-arrow)')) {
+            return;
+        }
         startX = e.touches[0].clientX;
     };
     
@@ -360,7 +363,10 @@ function initJeuxShowcase() {
         currentX = e.touches[0].clientX;
     };
     
-    const touchEndHandler = () => {
+    const touchEndHandler = (e) => {
+        if (e.target.closest('.btn-discover, a, button:not(.slider-arrow)')) {
+            return;
+        }
         const diff = startX - currentX;
         
         if (Math.abs(diff) > 50) {
