@@ -1758,7 +1758,7 @@
                     <span id="subtotal">0,00 €</span>
             </div>
                 <div class="summary-line">
-                    <span>Frais de port : calculés à l'étape suivante</span>
+                    <span>Frais de port : à partir de 4,90 € (choix à l'étape suivante)</span>
             </div>
                 <div class="summary-line total">
                 <span>Total TTC:</span>
@@ -3188,8 +3188,7 @@
         
         // Calculer totaux
         const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
-        const shippingInfo = calculateShipping(cart);
-        const total = subtotal + shippingInfo.price;
+        const total = subtotal;
         
         const subtotalEl = document.getElementById('subtotal');
         const shippingEl = document.getElementById('shipping');
@@ -3197,7 +3196,7 @@
         
         if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
         if (shippingEl) {
-            shippingEl.textContent = shippingInfo.label;
+            shippingEl.textContent = 'Frais de port : à partir de 4,90 € (choix à l\'étape suivante)';
         }
         if (totalEl) totalEl.textContent = formatPrice(total);
     }
