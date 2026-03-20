@@ -1801,6 +1801,12 @@
                     📍 Choisissez votre point relais :
                   </p>
                   <div id="Zone_Widget"></div>
+                  <button type="button" id="confirm-relay-btn" 
+                    style="display:none; margin-top:12px; background:#eda234; 
+                    color:#0f1419; border:none; padding:12px 24px; 
+                    border-radius:8px; font-weight:700; cursor:pointer; width:100%">
+                    ✅ Confirmer ce point relais
+                  </button>
                 </div>
                 <input type="hidden" id="SelectedRelay">
                 
@@ -3234,6 +3240,7 @@
           NbResults: "7",
           OnParcelShopSelected: function(data) {
             window.selectedRelay = data;
+            document.getElementById('confirm-relay-btn').style.display = 'block';
             document.getElementById('mr-widget-container')
               .querySelector('p').innerHTML =
               '✅ Point relais sélectionné : <strong>' +
@@ -3259,6 +3266,10 @@
       const codePostal = (postalInput.value || '').trim();
       if (codePostal && isMondialRelaySelected()) {
         container.style.display = 'block';
+        const confirmRelayBtn = document.getElementById('confirm-relay-btn');
+        if (confirmRelayBtn) {
+          confirmRelayBtn.style.display = 'none';
+        }
         initMRWidget(codePostal);
       } else {
         container.style.display = 'none';
@@ -3316,6 +3327,21 @@
             document.querySelectorAll('input[name="shipping-method"]').forEach((el) => {
                 el.addEventListener('change', () => updateMRWidgetVisibility());
             });
+            const confirmRelayBtn = document.getElementById('confirm-relay-btn');
+            if (confirmRelayBtn) {
+                confirmRelayBtn.addEventListener('click', function() {
+                    if (!window.selectedRelay) return;
+                    const container = document.getElementById('mr-widget-container');
+                    if (!container) return;
+                    const widgetZone = document.getElementById('Zone_Widget');
+                    if (widgetZone) widgetZone.style.display = 'none';
+                    confirmRelayBtn.style.display = 'none';
+                    container.querySelector('p').innerHTML =
+                        '✅ Point relais sélectionné : <strong>' +
+                        window.selectedRelay.Nom + ' — ' + window.selectedRelay.Adresse1 +
+                        ', ' + window.selectedRelay.CP + ' ' + window.selectedRelay.Ville + '</strong>';
+                });
+            }
 
             // Pré-remplissage automatique en dev uniquement
             if (window.location.hostname === 'localhost' ||

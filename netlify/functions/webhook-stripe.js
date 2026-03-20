@@ -44,6 +44,8 @@ exports.handler = async (event) => {
     ${session.metadata?.customer_zip || ''}`.trim();
       const amount = (session.amount_total / 100).toFixed(2);
       const sessionId = session.id;
+      const customerCity = session.metadata?.customer_city || '';
+      const customerPostal = session.metadata?.customer_zip || '';
 
       if (session.metadata && typeof session.metadata.estimated_delivery === 'string' &&
         session.metadata.estimated_delivery.toLowerCase().includes('avril-mai-2026')) {
@@ -78,6 +80,9 @@ exports.handler = async (event) => {
         `email=${encodeURIComponent(customerEmail)}&` +
         `phone=${encodeURIComponent(customerPhone)}&` +
         `address=${encodeURIComponent(adresse)}&` +
+        `city=${encodeURIComponent(customerCity)}&` +
+        `postal=${encodeURIComponent(customerPostal)}&` +
+        `amount=${encodeURIComponent((session.amount_total/100).toFixed(2))}&` +
         `product=${encodeURIComponent(session.metadata?.product_name || 'La Parole Transmise')}&` +
         `session=${encodeURIComponent(sessionId)}`;
       console.log('Envoi email admin à: mlumbroso68@gmail.com');
