@@ -188,9 +188,49 @@
   }
 
   /* Colissimo section */
+  /* Tabs transporteur */
+  .tabs {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 0;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 12px 12px 0 0;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    background: var(--dark3);
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .tab-btn.active-colissimo {
+    background: linear-gradient(135deg, #002f6c, #00437a);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  .tab-btn.active-mr {
+    background: linear-gradient(135deg, #e30613, #c0000f);
+    color: #fff;
+    border-color: transparent;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
   .colissimo-header {
     background: linear-gradient(135deg, #002f6c, #00437a);
-    border-radius: 16px 16px 0 0;
+    border-radius: 0 0 0 0;
     padding: 20px 28px;
     display: flex;
     align-items: center;
@@ -324,6 +364,72 @@
 
   .note strong { color: var(--gold); }
 
+  /* Mondial Relay */
+  .mr-header {
+    background: linear-gradient(135deg, #e30613, #c0000f);
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-bottom: none;
+  }
+
+  .mr-logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  .mr-logo span { color: #ffdd00; }
+
+  .mr-note {
+    background: rgba(227,6,19,0.1);
+    border: 1px solid rgba(227,6,19,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    color: #ff8a8a;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .mr-note strong { color: #ffb3b3; }
+
+  .relay-field {
+    background: var(--dark3);
+    border: 2px dashed rgba(227,6,19,0.3);
+    border-radius: 10px;
+    padding: 14px 18px;
+    grid-column: span 2;
+    text-align: center;
+  }
+
+  .relay-field .col-label { text-align: left; }
+
+  .relay-input {
+    width: 100%;
+    background: var(--dark2);
+    border: 1px solid rgba(227,6,19,0.4);
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    margin-top: 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .relay-input:focus { border-color: #e30613; }
+  .relay-input::placeholder { color: var(--text-muted); }
+
+  .copy-all-btn.mr {
+    background: linear-gradient(135deg, #e30613, #ff3333);
+    color: #fff;
+  }
+
   @media (max-width: 600px) {
     .grid, .col-grid { grid-template-columns: 1fr; }
     .span2, .col-field.full { grid-column: span 1; }
@@ -385,9 +491,20 @@
     </div>
   </div>
 
-  <!-- Clone Colissimo -->
-  <div class="section-title">📦 Formulaire Colissimo — Prêt à copier</div>
+  <!-- Transporteurs -->
+  <div class="section-title">📦 Créer une étiquette</div>
 
+  <div class="tabs">
+    <button class="tab-btn active-colissimo" id="tab-colissimo" onclick="switchTab('colissimo')">
+      🔵 Colissimo
+    </button>
+    <button class="tab-btn" id="tab-mr" onclick="switchTab('mr')">
+      🔴 Mondial Relay
+    </button>
+  </div>
+
+  <!-- PANEL COLISSIMO -->
+  <div class="tab-panel active" id="panel-colissimo">
   <div class="colissimo-header">
     <div>
       <div class="colissimo-logo">colissimo<span>.</span></div>
@@ -468,8 +585,81 @@
       puis copiez chaque champ en un clic. Le poids inclut le livre (900g) + l'enveloppe bulle (~100g).
     </div>
   </div>
+  </div><!-- fin panel colissimo -->
 
-</div>
+  <!-- PANEL MONDIAL RELAY -->
+  <div class="tab-panel" id="panel-mr">
+  <div class="mr-header">
+    <div>
+      <div class="mr-logo">Mondial <span>Relay</span></div>
+      <div class="colissimo-sub" style="color:rgba(255,255,255,0.6)">Champs pré-remplis · Point relais à saisir</div>
+    </div>
+    <div style="margin-left:auto; font-size:20px;">📍</div>
+  </div>
+
+  <div class="colissimo-body">
+    <div class="mr-note">
+      <strong>⚠️ Point relais :</strong> Le client a choisi Mondial Relay mais n'a pas encore sélectionné son point relais. 
+      Contactez-le par email ou demandez-lui de choisir sur <strong>mondialrelay.fr</strong> avant d'imprimer l'étiquette.
+    </div>
+
+    <div class="col-grid">
+
+      <div class="col-field">
+        <div class="col-label">Prénom</div>
+        <div class="col-value" id="mr-firstname">—</div>
+        <button class="copy-btn-sm" onclick="copyField('mr-firstname', this)">📋</button>
+      </div>
+
+      <div class="col-field">
+        <div class="col-label">Nom</div>
+        <div class="col-value" id="mr-lastname">—</div>
+        <button class="copy-btn-sm" onclick="copyField('mr-lastname', this)">📋</button>
+      </div>
+
+      <div class="col-field">
+        <div class="col-label">Téléphone</div>
+        <div class="col-value" id="mr-phone">—</div>
+        <button class="copy-btn-sm" onclick="copyField('mr-phone', this)">📋</button>
+      </div>
+
+      <div class="col-field">
+        <div class="col-label">Email</div>
+        <div class="col-value" id="mr-email">—</div>
+        <button class="copy-btn-sm" onclick="copyField('mr-email', this)">📋</button>
+      </div>
+
+      <div class="col-field">
+        <div class="col-label">Code postal client</div>
+        <div class="col-value highlight" id="mr-zip">—</div>
+        <button class="copy-btn-sm" onclick="copyField('mr-zip', this)">📋</button>
+      </div>
+
+      <div class="col-field">
+        <div class="col-label">Poids (kg)</div>
+        <div class="col-value highlight">1</div>
+        <button class="copy-btn-sm" onclick="copyText('1', this)">📋</button>
+      </div>
+
+      <!-- Champ point relais à saisir manuellement -->
+      <div class="relay-field">
+        <div class="col-label">📍 ID Point Relais (à compléter après contact client)</div>
+        <input class="relay-input" id="relay-id" type="text" placeholder="Ex: 62099 — trouvez-le sur mondialrelay.fr" />
+      </div>
+
+    </div>
+
+    <button class="copy-all-btn mr" onclick="copyAllMR()">📋 Tout copier (format Mondial Relay)</button>
+
+    <div class="note">
+      <strong>💡 Workflow :</strong> 1. Contactez le client pour obtenir son point relais préféré · 
+      2. Notez l'ID ci-dessus · 3. Connectez-vous sur <strong>connect.mondialrelay.com</strong> · 
+      4. Copiez les champs un à un.
+    </div>
+  </div>
+  </div><!-- fin panel mr -->
+
+
 
 <div class="toast" id="toast">✅ Copié !</div>
 
@@ -551,7 +741,41 @@
     });
   }
 
-  function copyAll() {
+  setText('mr-firstname', firstname);
+  setText('mr-lastname', lastname);
+  setText('mr-phone', phone);
+  setText('mr-email', email);
+  setText('mr-zip', zip);
+
+  function switchTab(tab) {
+    document.getElementById('panel-colissimo').classList.remove('active');
+    document.getElementById('panel-mr').classList.remove('active');
+    document.getElementById('tab-colissimo').className = 'tab-btn';
+    document.getElementById('tab-mr').className = 'tab-btn';
+
+    document.getElementById('panel-' + tab).classList.add('active');
+    if (tab === 'colissimo') {
+      document.getElementById('tab-colissimo').className = 'tab-btn active-colissimo';
+    } else {
+      document.getElementById('tab-mr').className = 'tab-btn active-mr';
+    }
+  }
+
+  function copyAllMR() {
+    const relayId = document.getElementById('relay-id').value || '(à compléter)';
+    const lines = [
+      `Prénom : ${document.getElementById('mr-firstname').textContent}`,
+      `Nom : ${document.getElementById('mr-lastname').textContent}`,
+      `Téléphone : ${document.getElementById('mr-phone').textContent}`,
+      `Email : ${document.getElementById('mr-email').textContent}`,
+      `Code postal : ${document.getElementById('mr-zip').textContent}`,
+      `Point Relais ID : ${relayId}`,
+      `Poids : 1 kg`,
+    ].join('\n');
+    navigator.clipboard.writeText(lines).then(() => showToast('✅ Récapitulatif MR copié !'));
+  }
+
+
     const lines = [
       `Prénom : ${document.getElementById('col-firstname').textContent}`,
       `Nom : ${document.getElementById('col-lastname').textContent}`,
