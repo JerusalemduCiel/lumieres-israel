@@ -44,9 +44,9 @@
     <link rel="stylesheet" href="css/prelaunch-popup.css">
     <link rel="stylesheet" href="css/certificates-modal.css">
     <link rel="stylesheet" href="css/rules-modal.css">
-    <link rel="stylesheet" href="https://widget.mondialrelay.com/parcelshop-picker/v4_0/styles/mondialrelay-widget.min.css">
+    <link rel="stylesheet" href="https://widget.mondialrelay.com/parcelshop-picker/v4_0/styles/mondialrelay-widget.min.css" type="text/css" />
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://widget.mondialrelay.com/parcelshop-picker/v4_0/scripts/mondialrelay-widget.min.js"></script>
+    <script type="text/javascript" src="https://widget.mondialrelay.com/parcelshop-picker/v4_0/scripts/mondialrelay-widget.min.js"></script>
     
     <!-- CSS pour produits en préparation -->
     <style>
@@ -3222,24 +3222,26 @@
         setTimeout(updateMRWidgetVisibility, 300);
     }
 
-    function initMRWidget(codePostal) {
-      $("#Zone_Widget").MR_ParcelShopPicker({
-        Target: "#SelectedRelay",
-        Brand: "CC23VA2Y",
-        Country: "FR",
-        PostCode: codePostal,
-        ColLivMod: "24R",
-        NbResults: "7",
-        OnParcelShopSelected: function(data) {
-          window.selectedRelay = data;
-          document.getElementById('mr-widget-container')
-            .querySelector('p').innerHTML =
-            '✅ Point relais sélectionné : <strong>' +
-            data.Nom + ' — ' + data.Adresse1 +
-            ', ' + data.CP + ' ' + data.Ville + '</strong>';
-        }
-      });
-    }
+    $(document).ready(function() {
+      window.initMRWidget = function(codePostal) {
+        $("#Zone_Widget").MR_ParcelShopPicker({
+          Target: "#SelectedRelay",
+          Brand: "CC23VA2Y",
+          Country: "FR",
+          PostCode: codePostal,
+          ColLivMod: "24R",
+          NbResults: "7",
+          OnParcelShopSelected: function(data) {
+            window.selectedRelay = data;
+            document.getElementById('mr-widget-container')
+              .querySelector('p').innerHTML =
+              '✅ Point relais sélectionné : <strong>' +
+              data.Nom + ' — ' + data.Adresse1 +
+              ', ' + data.CP + ' ' + data.Ville + '</strong>';
+          }
+        });
+      };
+    });
 
     function isMondialRelaySelected() {
       const selectedInput = document.querySelector('input[name="shipping-method"]:checked, input[name="delivery-method"]:checked');
