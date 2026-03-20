@@ -140,6 +140,7 @@ exports.handler = async (event) => {
         relay_address: body.relay_address || '',
         relay_city: body.relay_city || '',
         relay_id: body.relay_id || '',
+        shipping_method: body.shipping_method || 'colissimo',
         total_weight: totalWeight.toFixed(2),
         shipping_cost: shippingCost.toFixed(2)
       }

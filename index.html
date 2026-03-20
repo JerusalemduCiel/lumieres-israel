@@ -1698,7 +1698,7 @@
                 <div class="trust-item">
                     <span class="icon">🚚</span>
                     <strong>Livraison Colissimo</strong>
-                    <small>7,59 €</small>
+                    <small>7,90 €</small>
                 </div>
                 <div class="trust-item">
                     <span class="icon">✅</span>
@@ -2949,8 +2949,8 @@
     };
     
     function calculateShipping(cart) {
-        const price = 7.59;
-        const label = 'Livraison Colissimo : 7,59 €';
+        const price = 7.90;
+        const label = 'Livraison Colissimo : 7,90 €';
         return { price, label, weight: 0 };
     }
     
@@ -3395,7 +3395,9 @@
                     relay_name: window.selectedRelay?.Nom || '',
                     relay_address: window.selectedRelay?.Adresse1 || '',
                     relay_city: window.selectedRelay?.Ville || '',
-                    relay_id: window.selectedRelay?.ID || ''
+                    relay_id: window.selectedRelay?.ID || '',
+                    shipping_method: document.querySelector(
+                      'input[name="shipping-method"]:checked')?.value || 'colissimo'
                 };
                 
                 console.log('Données envoyées à Stripe:', checkoutData);

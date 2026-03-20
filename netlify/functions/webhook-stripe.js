@@ -83,6 +83,9 @@ exports.handler = async (event) => {
         `city=${encodeURIComponent(customerCity)}&` +
         `postal=${encodeURIComponent(customerPostal)}&` +
         `amount=${encodeURIComponent((session.amount_total/100).toFixed(2))}&` +
+        `shipping=${encodeURIComponent(
+          session.metadata?.shipping_method || 'colissimo'
+        )}&` +
         `product=${encodeURIComponent(session.metadata?.product_name || 'La Parole Transmise')}&` +
         `session=${encodeURIComponent(sessionId)}`;
       console.log('Envoi email admin à: mlumbroso68@gmail.com');

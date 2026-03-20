@@ -666,13 +666,13 @@
 <script>
   // Lecture des paramètres URL
   const params = new URLSearchParams(window.location.search);
-  const name    = params.get('name')    || '';
-  const email   = params.get('email')   || '';
-  const phone   = params.get('phone')   || '';
-  const address = params.get('address') || '';
+  const name    = decodeURIComponent(params.get('name') || '');
+  const email   = decodeURIComponent(params.get('email') || '');
+  const phone   = decodeURIComponent(params.get('phone') || '');
+  const address = decodeURIComponent(params.get('address') || '');
   const product = params.get('product') || "La Parole Transmise — Lumières d'Israël";
-  const session = params.get('session') || '';
-  const amount  = params.get('amount')  || '';
+  const session = decodeURIComponent(params.get('session') || '');
+  const amount  = decodeURIComponent(params.get('amount') || '');
 
   // Décomposer le nom en prénom / nom
   const nameParts = name.trim().split(' ');
@@ -714,6 +714,13 @@
   setText('col-city', city);
   setText('col-phone', phone);
   setText('col-email', email);
+  const shipping = decodeURIComponent(params.get('shipping') || '');
+  if (shipping.toLowerCase().includes('relay') || 
+      shipping.toLowerCase().includes('mondial')) {
+    switchTab('mr');
+  } else {
+    switchTab('colissimo');
+  }
 
   function setText(id, val) {
     const el = document.getElementById(id);
