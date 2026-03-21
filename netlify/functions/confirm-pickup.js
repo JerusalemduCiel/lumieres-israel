@@ -25,7 +25,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/html' },
-      body: '<html><body style="font-family:Arial;text-align:center;padding:60px"><h2>❌ Lien invalide</h2></body></html>'
+      body: '<html><head><meta charset="UTF-8"></head><body style="font-family:Arial;text-align:center;padding:60px"><h2>&#10060; Lien invalide</h2></body></html>'
     };
   }
 
@@ -45,11 +45,11 @@ exports.handler = async (event) => {
       return {
         statusCode: 200,
         headers: { 'Content-Type': 'text/html' },
-        body: `<html><body style="font-family:Arial;text-align:center;padding:60px;background:#f9f5f0">
+        body: `<html><head><meta charset="UTF-8"></head><body style="font-family:Arial;text-align:center;padding:60px;background:#f9f5f0">
           <div style="max-width:400px;margin:0 auto;background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
-            <div style="font-size:48px;margin-bottom:16px">⚠️</div>
-            <h2 style="color:#7B2335">Déjà retiré</h2>
-            <p style="color:#666">Cette commande a déjà été récupérée en boutique.</p>
+            <div style="font-size:48px;margin-bottom:16px">&#9888;</div>
+            <h2 style="color:#7B2335">D&#233;j&#224; retir&#233;</h2>
+            <p style="color:#666">Cette commande a d&#233;j&#224; &#233;t&#233; r&#233;cup&#233;r&#233;e en boutique.</p>
             <p style="color:#999;font-size:12px">Commande : ${session.metadata?.customer_name || ''}</p>
           </div>
         </body></html>`
@@ -95,13 +95,13 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/html' },
-      body: `<html><body style="font-family:Arial;text-align:center;padding:60px;background:#f9f5f0">
+      body: `<html><head><meta charset="UTF-8"></head><body style="font-family:Arial;text-align:center;padding:60px;background:#f9f5f0">
         <div style="max-width:400px;margin:0 auto;background:white;padding:40px;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
-          <div style="font-size:48px;margin-bottom:16px">✅</div>
-          <h2 style="color:#2e7d32">Retrait confirmé !</h2>
+          <div style="font-size:48px;margin-bottom:16px">&#9989;</div>
+          <h2 style="color:#2e7d32">Retrait confirm&#233; !</h2>
           <p style="color:#333;font-size:18px"><strong>${customerName}</strong></p>
           <p style="color:#666">Livre remis en boutique le<br/><strong>${pickupDate}</strong></p>
-          <p style="color:#999;font-size:12px;margin-top:20px">Blush Général Store · Lyon 6e</p>
+          <p style="color:#999;font-size:12px;margin-top:20px">Blush G&#233;n&#233;ral Store &#183; Lyon 6e</p>
         </div>
       </body></html>`
     };
@@ -110,8 +110,8 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'text/html' },
-      body: `<html><body style="font-family:Arial;text-align:center;padding:60px">
-        <h2>❌ Erreur</h2><p>${err.message}</p>
+      body: `<html><head><meta charset="UTF-8"></head><body style="font-family:Arial;text-align:center;padding:60px">
+        <h2>&#10060; Erreur</h2><p>${err.message}</p>
       </body></html>`
     };
   }

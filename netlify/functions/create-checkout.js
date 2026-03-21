@@ -90,56 +90,70 @@ exports.handler = async (event) => {
       };
     });
 
+    const shippingMethod = body.shipping_method || 'colissimo';
+
+    const optionCollect = {
+      shipping_rate_data: {
+        type: 'fixed_amount',
+        fixed_amount: {
+          amount: 0,
+          currency: 'eur'
+        },
+        display_name: 'Click & Collect — Blush Général Store (Lyon 6e)',
+        delivery_estimate: {
+          minimum: { unit: 'hour', value: 2 },
+          maximum: { unit: 'hour', value: 4 }
+        }
+      }
+    };
+
+    const optionMR = {
+      shipping_rate_data: {
+        type: 'fixed_amount',
+        fixed_amount: {
+          amount: 490,
+          currency: 'eur'
+        },
+        display_name: 'Mondial Relay (Point Relais)',
+        delivery_estimate: {
+          minimum: { unit: 'business_day', value: 3 },
+          maximum: { unit: 'business_day', value: 5 }
+        }
+      }
+    };
+
+    const optionColissimo = {
+      shipping_rate_data: {
+        type: 'fixed_amount',
+        fixed_amount: {
+          amount: 790,
+          currency: 'eur'
+        },
+        display_name: 'Colissimo (Domicile)',
+        delivery_estimate: {
+          minimum: { unit: 'business_day', value: 2 },
+          maximum: { unit: 'business_day', value: 3 }
+        }
+      }
+    };
+
+    let shippingOptions;
+    if (shippingMethod.includes('collect')) {
+      shippingOptions = [optionCollect, optionColissimo, optionMR];
+    } else if (shippingMethod.includes('relay') ||
+      shippingMethod.includes('mondial')) {
+      shippingOptions = [optionMR, optionColissimo, optionCollect];
+    } else {
+      shippingOptions = [optionColissimo, optionMR, optionCollect];
+    }
+
     // Créer session Stripe
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
       shipping_address_collection: { allowed_countries: ['FR'] },
-      shipping_options: [
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: {
-              amount: 490,
-              currency: 'eur'
-            },
-            display_name: 'Mondial Relay (Point Relais)',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 3 },
-              maximum: { unit: 'business_day', value: 5 }
-            }
-          }
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: {
-              amount: 790,
-              currency: 'eur'
-            },
-            display_name: 'Colissimo (Domicile)',
-            delivery_estimate: {
-              minimum: { unit: 'business_day', value: 2 },
-              maximum: { unit: 'business_day', value: 3 }
-            }
-          }
-        },
-        {
-          shipping_rate_data: {
-            type: 'fixed_amount',
-            fixed_amount: {
-              amount: 0,
-              currency: 'eur'
-            },
-            display_name: 'Click & Collect — Blush Général Store (Lyon 6e)',
-            delivery_estimate: {
-              minimum: { unit: 'hour', value: 2 },
-              maximum: { unit: 'hour', value: 4 }
-            }
-          }
-        }
-      ],
+      shipping_options: shippingOptions,
       success_url: `${process.env.URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.URL}/#boutique`,
       customer_email: customerInfo.email,
