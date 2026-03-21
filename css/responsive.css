@@ -644,18 +644,67 @@ img {
     .header-logo img {
         height: 50px !important;
     }
-    
-    /* Burger menu */
-    .burger-menu {
-        display: block !important;
-    }
-    
-    .mobile-nav {
-    display: none !important;
-  }
 
+    /* --- Header site (logo + liens visibles sur mobile) --- */
+    .site-header .header-container {
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        height: auto !important;
+        min-height: 55px;
+        row-gap: 0.25rem;
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+    }
+
+    .site-header.expanded .header-container {
+        height: auto !important;
+    }
+
+    .site-header .header-logo-wrapper {
+        order: 1;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    /* Panier + Précommander : restent sur la première ligne */
+    .site-header .header-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        flex-shrink: 0 !important;
+        order: 2;
+    }
+
+    /* Liens de navigation : colonne pleine largeur sous le logo */
+    .site-header .header-nav {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        flex-basis: 100% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        order: 3;
+        gap: 0.5rem !important;
+        margin: 0 !important;
+        padding: 10px 0 6px !important;
+        border-top: 1px solid rgba(74, 37, 23, 0.15);
+    }
+
+    .site-header .header-nav a {
+        font-size: max(14px, 0.95rem) !important;
+        color: #4a2517 !important;
+        line-height: 1.35 !important;
+    }
+
+    /* Menu burger / panneau latéral : inutiles si la nav est dans le header */
+    .site-header .burger-menu {
+        display: none !important;
+    }
+
+    .mobile-nav,
     .mobile-nav.active {
-        display: block !important;
+        display: none !important;
     }
     
     /* Cart icon */
