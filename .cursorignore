@@ -1,0 +1,10 @@
+# Dossier de backups — exclut de l'indexation Cursor pour accelerer l'ouverture
+backups/
+
+# Fichiers audio volumineux (.wav, .mp3) — pas utiles a l'indexation
+audio/*.wav
+audio/*.mp3
+
+# Videos
+videos/*.mp4
+videos/*.webm

@@ -19,6 +19,23 @@
     <title>Ora Shel Torah - Jeux éducatifs juifs | De génération en génération</title>
     <meta name="description" content="Jeux éducatifs juifs pour transmettre la Torah en famille avec joie. Jérusalem du Ciel, Minhag ou Halakha, La Parole Transmise - Lumières d'Israël. Certifiés halakhiquement. Précommandez.">
     
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://orasheltorah.fr/">
+    <meta property="og:title" content="Ora Shel Torah - Jeux de Société Éducatifs Juifs">
+    <meta property="og:description" content="Transmettez la richesse du judaïsme en famille par le jeu. 3 jeux certifiés halakhiquement et compatibles Shabbat : Jérusalem du Ciel, Minhag ou Halakha, La Parole Transmise - Lumières d'Israël.">
+    <meta property="og:image" content="https://orasheltorah.fr/images/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="fr_FR">
+    <meta property="og:site_name" content="Ora Shel Torah">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://orasheltorah.fr/">
+    <meta name="twitter:title" content="Ora Shel Torah - Jeux de Société Éducatifs Juifs">
+    <meta name="twitter:description" content="Transmettez la richesse du judaïsme en famille par le jeu. 3 jeux certifiés halakhiquement et compatibles Shabbat.">
+    <meta name="twitter:image" content="https://orasheltorah.fr/images/og-image.jpg">
     
     <link rel="canonical" href="https://orasheltorah.fr/">
     <meta name="google-site-verification" content="IBzdz8Su935Z6s_fI-JxuqDtIeRXjZQRDtUREqYiLr4" />
@@ -975,6 +992,9 @@ margin-top:10px; width:100%;">
     </footer>
 
     <!-- Script pour année dynamique -->
+    <script>
+    document.getElementById('copyright-year').textContent = new Date().getFullYear();
+    </script>
 
 
     <!-- Bouton retour en haut -->
@@ -1018,11 +1038,894 @@ margin-top:10px; width:100%;">
     <script src="js/rules-modal.js"></script>
     
     <!-- Code Panier Minimal - Inline -->
-    <script src="js/cart-stripe.js?v=20260313" defer></script>
+    <script>
+    // NETTOYAGE - À retirer après test
+    localStorage.removeItem('cart');
+    console.log('Panier nettoyé');
     
+    // Panier minimal - Tout en vanilla JavaScript
+    let cart = [];
+    
+    // Produits avec priceId Stripe
+    // IMPORTANT: Les clés DOIVENT correspondre exactement aux productId utilisés dans addToCart()
+    const products = {
+        jdc: {
+            id: 'jdc',
+            name: 'Jérusalem du Ciel',
+            price: 39.90,
+            priceId: 'price_1SBf5wL4ecjfMIxOm0nbZ5sp',
+            image: './images/jdc_picto_arrondi.png',
+            available: false
+        },
+        moh: {
+            id: 'moh',
+            name: 'Minhag ou Halakha',
+            price: 19.90,
+            priceId: 'price_1SBf6vL4ecjfMIxOYXAbWfh8',
+            image: './images/moh_picto_arrondi.png',
+            available: true
+        },
+        poz: {
+            id: 'poz',
+            name: 'Poztamitsvah',
+            price: 19.90,
+            priceId: 'price_1SBf7lL4ecjfMIxOKuRj4czs',
+            image: './images/poz_picto_arrondi.png',
+            available: false
+        },
+        lumieres: {
+            id: 'lumieres',
+            name: 'La Parole Transmise - Lumières d\'Israël',
+            price: 39.90,
+            priceId: 'price_1Scn6GL4ecjfMIxOPxaM9FMl', // TODO: mettre à jour le priceId Stripe pour 39.90€
+            image: './images/mockup_boite_serie1_recto.png',
+            available: true
+        },
+        pack: {
+            id: 'pack',
+            name: 'Pack Complet Ora Shel Torah',
+            price: 79.90,
+            priceId: null, // TODO: Ajouter le priceId Stripe pour le pack
+            image: './images/pack-3d.png'
+        }
+    };
+    
+    // Poids des produits (en kg) - À AJUSTER selon pesée réelle
+    const productWeights = {
+        'jdc': 2.8,    // Jérusalem du Ciel : 850 cartes + plateau circulaire
+        'moh': 0.7,    // Minhag ou Halakha : 330 cartes
+        'poz': 0.6,    // Poztamitsvah : 220 cartes
+        'pack': 4.0    // Pack complet
+    };
+    
+    function calculateShipping(cart) {
+        const price = 7.90;
+        const label = 'Livraison Colissimo : 7,90 €';
+        return { price, label, weight: 0 };
+    }
+    
+    // Charger le panier depuis localStorage
+    try {
+        const saved = localStorage.getItem('cart');
+        if (saved) {
+            cart = JSON.parse(saved);
+        }
+    } catch (e) {
+        cart = [];
+    }
+    
+    // Fonction pour ouvrir/fermer le panier
+    function toggleCart() {
+        const panel = document.getElementById('cart-panel');
+        console.log('Panel trouvé:', panel);
+        
+        if (!panel) {
+            console.error('ERREUR: cart-panel introuvable');
+            return;
+        }
+        
+        const isOpen = panel.classList.toggle('open');
+        console.log('Panier ouvert:', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+    
+    // Fonction pour fermer le panier
+    function closeCart() {
+        const panel = document.getElementById('cart-panel');
+        if (panel) {
+            panel.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    }
+    
+    // Formater le prix
+    function formatPrice(price) {
+        return new Intl.NumberFormat('fr-FR', {
+            style: 'currency',
+            currency: 'EUR'
+        }).format(price);
+    }
+    
+    // Mettre à jour l'affichage du panier
+    function updateCartDisplay() {
+        // Compteur
+        const count = document.querySelector('.cart-count');
+        if (count) {
+            const total = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+            count.textContent = total;
+            if (total > 0) {
+                count.style.display = 'flex';
+            } else {
+                count.style.display = 'none';
+            }
+        }
+        
+        // Articles dans le panier
+        const itemsDiv = document.querySelector('.cart-items');
+        if (!itemsDiv) return;
+        
+        if (cart.length === 0) {
+            itemsDiv.innerHTML = '<p class="cart-empty">Votre panier est vide</p>';
+            const totalEl = document.getElementById('cart-total');
+            if (totalEl) totalEl.textContent = '0€';
+            return;
+        }
+        
+        itemsDiv.innerHTML = cart.map(item => `
+            <div class="cart-item" data-product="${item.id || ''}">
+                ${item.image ? `<img src="${item.image}" alt="${item.name || ''}" loading="lazy">` : ''}
+                <div class="cart-item-details">
+                    <h4>${item.name || 'Produit'}</h4>
+                    <p>${formatPrice(item.price || 0)}</p>
+                    <div class="cart-item-quantity">
+                        <button onclick="updateQuantity('${item.id}', ${Math.max(1, (item.quantity || 1) - 1)})">-</button>
+                        <span>${item.quantity || 1}</span>
+                        <button onclick="updateQuantity('${item.id}', ${(item.quantity || 1) + 1})">+</button>
+                    </div>
+                </div>
+                <div class="item-price">${formatPrice((item.price || 0) * (item.quantity || 1))}</div>
+                <button onclick="removeFromCart('${item.id}')" title="Supprimer">×</button>
+            </div>
+        `).join('');
+        
+        updateCartTotal();
+    }
+    
+    // Mettre à jour le total
+    function updateCartTotal() {
+        const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+        // Total = subtotal uniquement (frais de port calculés par Stripe)
+        const total = subtotal;
+        
+        // Mettre à jour le total dans cart-panel
+        const totalEl = document.getElementById('cart-total');
+        if (totalEl) {
+            totalEl.textContent = formatPrice(total);
+            
+            // Ajouter la mention discrète sous le total si elle n'existe pas déjà
+            if (!document.querySelector('.shipping-notice')) {
+                const notice = document.createElement('p');
+                notice.className = 'shipping-notice';
+                notice.style.cssText = 'font-size:0.8rem; color:#888; text-align:center; margin:5px 0';
+                notice.textContent = '🚚 Frais de port calculés à la commande';
+                totalEl.parentElement.appendChild(notice);
+            }
+        }
+        
+        // Mettre à jour aussi les totaux dans l'ancien panier (si présent)
+        const subtotalEl = document.querySelector('.subtotal-amount');
+        const shippingEl = document.querySelector('.shipping-amount');
+        const oldTotalEl = document.querySelector('.total-amount');
+        
+        // Masquer la ligne frais de port si elle existe
+        if (shippingEl) {
+            const shippingRow = shippingEl.closest('.shipping-row, .summary-line');
+            if (shippingRow) {
+                shippingRow.style.display = 'none';
+            } else {
+                shippingEl.style.display = 'none';
+            }
+        }
+        
+        if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
+        if (oldTotalEl) oldTotalEl.textContent = formatPrice(total);
+    }
+    
+    // Notification d'ajout au panier
+    function showCartNotification(productName) {
+        const existing = document.querySelectorAll('.cart-notification');
+        existing.forEach(n => n.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = 'cart-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                ✓ ${productName} ajouté au panier
+                <button onclick="toggleCart()">Voir le panier</button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        setTimeout(() => notification.classList.add('show'), 10);
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+    
+    // Ajouter au panier
+    function addToCart(productId, productName, price, image) {
+        cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        // Trouver le produit directement par sa clé (simplifié)
+        const product = products[productId];
+        const priceId = product ? product.priceId : null;
+        
+        // Vérifier si le produit est disponible
+        if (product && product.available === false) {
+            alert('Ce produit n\'est pas encore disponible. Sortie prévue : Printemps 2026.\n\nUtilisez le bouton "Me prévenir" pour être informé de sa disponibilité.');
+            return;
+        }
+        
+        // DEBUG: Log pour vérifier la correspondance
+        console.log('Adding to cart:', { productId, product, priceId });
+        
+        // Vérifier que le priceId existe (sauf pour le pack qui peut être géré différemment)
+        if (!priceId && productId !== 'pack') {
+            alert('Erreur: priceId manquant pour ' + productName + '\n\nLe produit n\'a pas été ajouté au panier.');
+            console.error('Produit sans priceId:', { productId, productName, product });
+            return;
+        }
+        
+        // Avertir pour le pack (mais permettre l'ajout)
+        if (!priceId && productId === 'pack') {
+            console.warn('Pack ajouté sans priceId Stripe - Le checkout ne fonctionnera pas pour le pack');
+        }
+        
+        const existingItem = cart.find(item => item.id === productId);
+        if (existingItem) {
+            existingItem.quantity++;
+            // Mettre à jour le priceId si nécessaire
+            if (!existingItem.priceId && priceId) {
+                existingItem.priceId = priceId;
+            }
+        } else {
+            cart.push({ 
+                id: productId, 
+                name: productName, 
+                price: parseFloat(price), 
+                priceId: priceId,
+                image: image || '', 
+                quantity: 1 
+            });
+        }
+        
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartDisplay();
+        showCartNotification(productName);
+    }
+    
+    // Retirer du panier
+    function removeFromCart(productId) {
+        cart = cart.filter(item => item.id !== productId);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartDisplay();
+    }
+    
+    // Mettre à jour la quantité
+    function updateQuantity(productId, quantity) {
+        const item = cart.find(item => item.id === productId);
+        if (item) {
+            const newQuantity = Math.max(1, parseInt(quantity) || 1);
+            item.quantity = newQuantity;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartDisplay();
+        }
+    }
+    
+    // Fonction pour continuer les achats depuis le panier
+    function continueShoppingFromCart() {
+        toggleCart(); // Fermer le panier
+        const boutiqueSection = document.getElementById('boutique');
+        if (boutiqueSection) {
+            boutiqueSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+    
+    // Fonction pour passer commande
+    function proceedToCheckout() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        
+        if (cart.length === 0) {
+            alert('Votre panier est vide');
+            return;
+        }
+        
+        // Afficher la modal
+        const modal = document.getElementById('checkout-modal');
+        if (modal) {
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Remplir les items
+        const itemsDiv = document.getElementById('checkout-items');
+        if (itemsDiv) {
+            itemsDiv.innerHTML = cart.map(item => `
+                <div class="checkout-item">
+                    <img src="${item.image || ''}" alt="${item.name || 'Produit'}" loading="lazy">
+                    <div class="item-details">
+                        <h4>${item.name || 'Produit'}</h4>
+                        <p>Quantité: ${item.quantity || 1}</p>
+                    </div>
+                    <div class="item-price">${formatPrice((item.price || 0) * (item.quantity || 1))}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Calculer totaux
+        const subtotal = cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+        const total = subtotal;
+        
+        const subtotalEl = document.getElementById('subtotal');
+        const shippingEl = document.getElementById('shipping');
+        const totalEl = document.getElementById('total');
+        
+        if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
+        if (shippingEl) {
+            shippingEl.textContent = 'Frais de port : selon le mode de livraison choisi ci-dessous';
+        }
+        if (totalEl) totalEl.textContent = formatPrice(total);
+        setTimeout(updateMRWidgetVisibility, 300);
+    }
 
-    <script src="js/checkout.js?v=20260313" defer></script>
+    $(document).ready(function() {
+      window.initMRWidget = function(codePostal) {
+        $("#Zone_Widget").MR_ParcelShopPicker({
+          Target: "#SelectedRelay",
+          Brand: "CC23VA2Y",
+          Country: "FR",
+          PostCode: codePostal,
+          ColLivMod: "24R",
+          NbResults: "7",
+          OnParcelShopSelected: function(data) {
+            window.selectedRelay = data;
+            document.getElementById('confirm-relay-btn').style.display = 'block';
+            document.getElementById('mr-widget-container')
+              .querySelector('p').innerHTML =
+              '✅ Point relais sélectionné : <strong>' +
+              data.Nom + ' — ' + data.Adresse1 +
+              ', ' + data.CP + ' ' + data.Ville + '</strong>';
+          }
+        });
+      };
+    });
+
+    function isMondialRelaySelected() {
+      const selectedInput = document.querySelector('input[name="shipping-method"]:checked, input[name="delivery-method"]:checked');
+      const selectedSelect = document.querySelector('select[name="shipping-method"], select[name="delivery-method"]');
+      const selectedValue = ((selectedInput && selectedInput.value) || (selectedSelect && selectedSelect.value) || '').toLowerCase();
+      return selectedValue.includes('mondial') || selectedValue.includes('relay') || selectedValue.includes('24r');
+    }
+
+    function updateMRWidgetVisibility() {
+      const postalInput = document.getElementById('postal') || document.getElementById('customer-zip');
+      const container = document.getElementById('mr-widget-container');
+      if (!postalInput || !container) return;
+
+      const codePostal = (postalInput.value || '').trim();
+      if (codePostal && isMondialRelaySelected()) {
+        container.style.display = 'block';
+        const confirmRelayBtn = document.getElementById('confirm-relay-btn');
+        if (confirmRelayBtn) {
+          confirmRelayBtn.style.display = 'none';
+        }
+        initMRWidget(codePostal);
+      } else {
+        container.style.display = 'none';
+      }
+    }
     
+    // Fonction pour fermer la modal de checkout
+    function closeCheckout() {
+        const modal = document.getElementById('checkout-modal');
+        if (modal) {
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    }
+    
+    // Gérer la soumission du formulaire de checkout
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM chargé');
+        const panel = document.getElementById('cart-panel');
+        console.log('Panel existe:', !!panel);
+        
+        updateCartDisplay();
+        
+        // Event listener pour l'icône panier
+        const cartIcon = document.querySelector('.cart-icon');
+        
+        if (cartIcon) {
+            console.log('Icon panier trouvée, ajout listener');
+            
+            // Retirer onclick si conflit
+            cartIcon.removeAttribute('onclick');
+            
+            // Ajouter listener
+            cartIcon.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Click sur icône panier');
+                toggleCart();
+            });
+        } else {
+            console.error('Icône panier introuvable');
+        }
+        
+        // Gérer la soumission du formulaire de checkout
+        const checkoutForm = document.getElementById('checkout-form');
+        if (checkoutForm) {
+            const postalInput = document.getElementById('postal') || document.getElementById('customer-zip');
+            if (postalInput) {
+                postalInput.addEventListener('input', updateMRWidgetVisibility);
+                postalInput.addEventListener('change', updateMRWidgetVisibility);
+            }
+            document.querySelectorAll('input[name="shipping-method"], input[name="delivery-method"], select[name="shipping-method"], select[name="delivery-method"]').forEach((el) => {
+                el.addEventListener('change', updateMRWidgetVisibility);
+            });
+            document.querySelectorAll('input[name="shipping-method"]').forEach((el) => {
+                el.addEventListener('change', () => updateMRWidgetVisibility());
+            });
+            document.querySelectorAll('input[name="shipping-method"]')
+              .forEach(radio => {
+                radio.addEventListener('change', function() {
+                  const selector = document.getElementById(
+                    'collect-store-selector');
+                  if (selector) {
+                    selector.style.display =
+                      this.value === 'collect' ? 'block' : 'none';
+                  }
+                });
+              });
+            const confirmRelayBtn = document.getElementById('confirm-relay-btn');
+            if (confirmRelayBtn) {
+                confirmRelayBtn.addEventListener('click', function() {
+                    if (!window.selectedRelay) return;
+                    const container = document.getElementById('mr-widget-container');
+                    if (!container) return;
+                    const widgetZone = document.getElementById('Zone_Widget');
+                    if (widgetZone) widgetZone.style.display = 'none';
+                    confirmRelayBtn.style.display = 'none';
+                    container.querySelector('p').innerHTML =
+                        '✅ Point relais sélectionné : <strong>' +
+                        window.selectedRelay.Nom + ' — ' + window.selectedRelay.Adresse1 +
+                        ', ' + window.selectedRelay.CP + ' ' + window.selectedRelay.Ville + '</strong>';
+                });
+            }
+
+            // Pré-remplissage automatique en dev uniquement
+            if (window.location.hostname === 'localhost' ||
+                window.location.hostname === '127.0.0.1') {
+                const devData = {
+                    'customer-name': 'Michael Lumbroso',
+                    'customer-email': 'mlumbroso68@gmail.com',
+                    'customer-phone': '0618061000',
+                    'customer-address': '27 boulevard des belges',
+                    'customer-city': 'Lyon',
+                    'customer-zip': '69006',
+                    'customer-country': 'FR'
+                };
+                Object.entries(devData).forEach(([id, val]) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = val;
+                });
+            }
+            checkoutForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(e.target);
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                
+                // Calculer frais de port (sera recalculé côté serveur, mais on l'utilise pour vérification)
+                const shippingInfo = calculateShipping(cart);
+                
+                // Vérifier que tous les produits ont un priceId
+                const itemsWithoutPriceId = cart.filter(item => !item.priceId);
+                if (itemsWithoutPriceId.length > 0) {
+                    console.error('Produits sans priceId:', itemsWithoutPriceId);
+                    alert('Erreur : Certains produits n\'ont pas de priceId Stripe. Veuillez réessayer.');
+                    return;
+                }
+                
+                // Préparer les données pour Stripe (format simplifié)
+                const checkoutData = {
+                    items: cart.map(item => ({
+                        priceId: item.priceId,
+                        quantity: item.quantity || 1
+                    })),
+                    customerInfo: {
+                        name: formData.get('name'),
+                        email: formData.get('email'),
+                        phone: formData.get('phone'),
+                        address: formData.get('address'),
+                        city: formData.get('city'),
+                        postal: formData.get('postal'),
+                        country: formData.get('country')
+                    },
+                    relay_name: window.selectedRelay?.Nom || '',
+                    relay_address: window.selectedRelay?.Adresse1 || '',
+                    relay_city: window.selectedRelay?.Ville || '',
+                    relay_id: window.selectedRelay?.ID || '',
+                    shipping_method: document.querySelector(
+                      'input[name="shipping-method"]:checked')?.value || 'colissimo',
+                    pickup_store: document.getElementById('pickup-store')?.value || ''
+                };
+                
+                console.log('Données envoyées à Stripe:', checkoutData);
+                
+                try {
+                    // Afficher un loader
+                    const submitBtn = e.target.querySelector('button[type="submit"]');
+                    const originalText = submitBtn.textContent;
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Traitement...';
+                    
+                    // Appel à la fonction Netlify
+                    const response = await fetch('/.netlify/functions/create-checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(checkoutData)
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Response error:', errorText);
+                        let errorData;
+                        try {
+                            errorData = JSON.parse(errorText);
+                        } catch (e) {
+                            errorData = { error: errorText };
+                        }
+                        throw new Error(errorData.error || `Erreur serveur: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Réponse Netlify:', data);
+                    
+                    if (!data.sessionId) {
+                        throw new Error('Session ID manquant dans la réponse');
+                    }
+                    
+                    // Redirection Stripe
+                    const stripe = Stripe('pk_live_51SBeyrLLfYKjr3rUDC9XHZw0mEQPPnQnR7bWnhkec0MqOGh6BfNKm1z9PAHmoT5ozk21RiZI2g4CZYBPb8DP8PZ000gcXNmXeL');
+                    await stripe.redirectToCheckout({ sessionId: data.sessionId });
+                    
+                } catch (error) {
+                    console.error('Erreur de paiement:', error);
+                    alert(`Erreur: ${error.message || 'Une erreur est survenue. Veuillez réessayer.'}`);
+                    
+                    // Réactiver le bouton
+                    const submitBtn = e.target.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText || 'Payer par carte →';
+                    }
+                }
+            });
+        }
+        
+        // Fermer la modal en cliquant en dehors
+        const checkoutModal = document.getElementById('checkout-modal');
+        if (checkoutModal) {
+            checkoutModal.addEventListener('click', function(e) {
+                if (e.target === checkoutModal) {
+                    closeCheckout();
+                }
+            });
+        }
+    });
+    </script>
+    
+    <!-- Script pour le formulaire de contact unifié -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const userTypeSelect = document.getElementById('user-type');
+            const organizationField = document.getElementById('organization-field');
+            const partnershipTypeField = document.getElementById('partnership-type-field');
+            const organizationInput = document.getElementById('unified-organization');
+            const partnershipTypeSelect = document.getElementById('unified-partnership-type');
+            const unifiedForm = document.getElementById('unified-contact-form');
+            
+            // Fonction pour afficher/masquer les champs conditionnels
+            function toggleConditionalFields() {
+                const selectedValue = userTypeSelect.value;
+                
+                if (selectedValue === 'entreprise') {
+                    // Afficher les champs conditionnels
+                    organizationField.style.display = 'block';
+                    partnershipTypeField.style.display = 'block';
+                    
+                    // Rendre les champs obligatoires
+                    organizationInput.setAttribute('required', 'required');
+                    partnershipTypeSelect.setAttribute('required', 'required');
+                    
+                    // Changer l'action du formulaire pour partenariat
+                    unifiedForm.action = 'https://formspree.io/f/xvgwgezy';
+                } else {
+                    // Masquer les champs conditionnels
+                    organizationField.style.display = 'none';
+                    partnershipTypeField.style.display = 'none';
+                    
+                    // Retirer l'obligation des champs
+                    organizationInput.removeAttribute('required');
+                    partnershipTypeSelect.removeAttribute('required');
+                    
+                    // Réinitialiser les valeurs
+                    organizationInput.value = '';
+                    partnershipTypeSelect.value = '';
+                    
+                    // Changer l'action du formulaire pour contact
+                    unifiedForm.action = 'https://formspree.io/f/xwprpgvk';
+                }
+            }
+            
+            // Écouter les changements sur le select "Vous êtes"
+            if (userTypeSelect) {
+                userTypeSelect.addEventListener('change', toggleConditionalFields);
+            }
+        });
+    </script>
+
+    <!-- Script pour Acte 2 - Layout Magazine -->
+    <script>
+        // ========== DÉBOGAGE MODALE PARCOURS ==========
+        console.log('=== DÉBOGAGE MODALE PARCOURS ===');
+        
+        // Vérifier que les éléments existent
+        const storyFull = document.getElementById('story-full');
+        console.log('Modale trouvée (story-full) :', storyFull);
+        
+        const btnLireSuite = document.querySelector('.lien-voir-plus');
+        console.log('Bouton "voir plus" trouvé :', btnLireSuite);
+        
+        const btnCloseModal = storyFull?.querySelector('.close-story');
+        console.log('Bouton fermeture trouvé (.close-story) :', btnCloseModal);
+        
+        // Test direct de fermeture - Vérification avant utilisation
+        let closeStory = document.querySelector('.close-story');
+        if (closeStory) {
+            // Utiliser closeStory si trouvé globalement
+            if (!btnCloseModal && closeStory) {
+                closeStory.addEventListener('click', function(e) {
+                    console.log('CLIC SUR LA CROIX DÉTECTÉ !');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const modal = document.getElementById('story-full');
+                    if (modal) {
+                        console.log('Tentative de fermeture...');
+                        modal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                        console.log('Modale fermée !');
+                    }
+                });
+            }
+        }
+        
+        if (btnCloseModal) {
+            btnCloseModal.addEventListener('click', function(e) {
+                console.log('CLIC SUR LA CROIX DÉTECTÉ !');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const modal = document.getElementById('story-full');
+                if (modal) {
+                    console.log('Tentative de fermeture...');
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    console.log('Modale fermée !');
+                } else {
+                    console.error('ERREUR : story-full introuvable lors de la fermeture');
+                }
+            });
+            console.log('✅ Event listener ajouté sur la croix');
+        } else {
+            console.error('❌ ERREUR : Bouton de fermeture (.close-story) introuvable !');
+            console.log('Vérification de la structure HTML...');
+            if (storyFull) {
+                console.log('Contenu de story-full :', storyFull.innerHTML.substring(0, 200));
+            }
+        }
+        
+        console.log('=== FIN DÉBOGAGE ===');
+        
+        // ========== MODALE PARCOURS - Gestion ouverture/fermeture ==========
+        
+        // Fonction pour ouvrir la modale
+        function openStoryModal() {
+            if (storyFull) {
+                // Retirer la classe de fermeture
+                storyFull.classList.remove('modal-fermee');
+                // Ajouter la classe d'ouverture
+                storyFull.classList.add('modal-ouverte');
+                
+                // FORCER le display flex avec !important
+                storyFull.style.setProperty('display', 'flex', 'important');
+                document.body.style.setProperty('overflow', 'hidden', 'important');
+                console.log('Modale ouverte');
+            }
+        }
+        
+        // Fonction pour fermer la modale
+        function closeStoryModal() {
+            if (storyFull) {
+                // FORCER le display none avec !important
+                storyFull.style.setProperty('display', 'none', 'important');
+                
+                // AJOUTER une classe de fermeture
+                storyFull.classList.add('modal-fermee');
+                storyFull.classList.remove('modal-ouverte');
+                
+                // Réactiver le scroll avec !important
+                document.body.style.setProperty('overflow', 'auto', 'important');
+                console.log('Modale fermée');
+            }
+        }
+        
+        // Ouverture de la modale
+        if (btnLireSuite && storyFull) {
+            btnLireSuite.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openStoryModal();
+            });
+        }
+        
+        // Fermeture via le bouton [X] - Utiliser la délégation d'événements
+        // Réutiliser la variable closeStory déjà déclarée plus haut (ligne 3421)
+        if (!closeStory) {
+            closeStory = document.querySelector('.close-story');
+        }
+        if (closeStory) {
+            // Vérifier que l'event listener n'est pas déjà ajouté
+            const hasListener = closeStory.getAttribute('data-listener-added');
+            if (!hasListener) {
+                closeStory.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeStoryModal();
+                    return;
+                });
+                closeStory.setAttribute('data-listener-added', 'true');
+            }
+        }
+        
+        if (storyFull) {
+            storyFull.addEventListener('click', function(e) {
+                // Si on clique sur le bouton de fermeture
+                if (e.target.classList.contains('close-story') || e.target.closest('.close-story')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeStoryModal();
+                    return;
+                }
+                
+                // Si on clique sur le fond sombre (overlay), pas sur le contenu
+                if (e.target === storyFull) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeStoryModal();
+                }
+            });
+            
+            // Empêcher la fermeture quand on clique dans le contenu
+            const storyModal = storyFull.querySelector('.story-modal');
+            if (storyModal) {
+                storyModal.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        }
+        
+        // Fermeture avec la touche Échap
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && storyFull && storyFull.style.display === 'flex') {
+                closeStoryModal();
+            }
+        });
+
+        // Bouton vidéo philosophie
+        const btnLoadVideo = document.querySelector('.btn-load-video');
+        const videoFrame = document.getElementById('philosophy-video-frame');
+
+        if (btnLoadVideo && videoFrame) {
+            btnLoadVideo.addEventListener('click', function() {
+                const videoId = this.getAttribute('data-video-id');
+                const wrapper = this.closest('.video-wrapper');
+                const previewContent = wrapper.querySelector('.video-preview-content');
+                const overlay = wrapper.querySelector('.video-overlay');
+                
+                // Cacher contenu de prévisualisation, overlay et bouton
+                if (previewContent) previewContent.style.display = 'none';
+                if (overlay) overlay.style.display = 'none';
+                this.style.display = 'none';
+                
+                // Afficher et lancer la vidéo
+                videoFrame.style.display = 'block';
+                videoFrame.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            });
+        }
+
+        // Effet hover sur cartes inspirations
+        const inspirationCards = document.querySelectorAll('.inspiration-card');
+        inspirationCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = 'none';
+            });
+        });
+    </script>
+    
+    <!-- Fonction de fermeture simple et directe pour la modale "Mon parcours" -->
+    <script>
+        // Fonction de fermeture simple et directe
+        function fermerModaleParcours() {
+            console.log('fermerModaleParcours() appelée');
+            
+            // Chercher la modale par plusieurs méthodes
+            const modal = document.getElementById('story-full') ||
+                          document.querySelector('.story-modal-overlay') ||
+                          document.querySelector('[id="story-full"]');
+            
+            if (modal) {
+                console.log('Modale trouvée, fermeture FORCÉE...');
+                
+                // FORCER le display none avec !important
+                modal.style.setProperty('display', 'none', 'important');
+                
+                // AJOUTER une classe de fermeture
+                modal.classList.add('modal-fermee');
+                modal.classList.remove('modal-ouverte');
+                
+                // Réactiver le scroll avec !important
+                document.body.style.setProperty('overflow', 'auto', 'important');
+                
+                console.log('Modale fermée avec succès (forcé)');
+            } else {
+                console.error('ERREUR : Modale introuvable !');
+                // Essai de forcer la fermeture de toutes les modales
+                document.querySelectorAll('.story-modal-overlay, [id*="story"]').forEach(m => {
+                    m.style.setProperty('display', 'none', 'important');
+                    m.classList.add('modal-fermee');
+                    m.classList.remove('modal-ouverte');
+                });
+                document.body.style.setProperty('overflow', 'auto', 'important');
+            }
+        }
+        
+        // Fermeture avec Échap (backup)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('story-full');
+                if (modal && (modal.classList.contains('modal-ouverte') || modal.style.display === 'flex')) {
+                    fermerModaleParcours();
+                }
+            }
+        });
+        
+        // Fermeture en cliquant sur le fond (backup)
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('story-full');
+            if (modal && e.target === modal && (modal.classList.contains('modal-ouverte') || modal.style.display === 'flex')) {
+                fermerModaleParcours();
+            }
+        });
+    </script>
 
     <!-- MODALE PARCOURS - Mon parcours : de l'éloignement à la lumière -->
     <div id="story-full" class="story-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 9999; overflow: hidden; padding: 0;">
@@ -1164,6 +2067,50 @@ margin-top:10px; width:100%;">
         </div>
     </div>
 
+    <!-- Parallaxe Bandeau Ticket d'Or -->
+    <script>
+    // Parallaxe Bandeau Ticket d'Or
+    document.addEventListener('DOMContentLoaded', function() {
+        const bandeau = document.getElementById('bandeau-parallax');
+        const frise = document.querySelector('.frise-content');
+        const section = document.querySelector('.bandeau-ticket-or');
+        
+        if (bandeau && frise && section) {
+            window.addEventListener('scroll', function() {
+                // Désactiver le parallax sur mobile
+                if (window.innerWidth <= 768) {
+                    bandeau.style.transform = 'none';
+                    frise.style.transform = 'none';
+                    return;
+                }
+                
+                const rect = section.getBoundingClientRect();
+                const windowHeight = window.innerHeight;
+                
+                // Vérifie si la section est visible
+                if (rect.top < windowHeight && rect.bottom > 0) {
+                    // Calcul du pourcentage de scroll dans la section
+                    const scrollPercent = (windowHeight - rect.top) / (windowHeight + rect.height);
+                    
+                    // Parallaxe accentuée sur desktop : mouvement plus prononcé
+                    const bandeauOffset = (scrollPercent - 0.5) * -150; // Droite → Gauche (augmenté de -100 à -150)
+                    const friseOffset = (scrollPercent - 0.5) * 200; // Gauche → Droite (augmenté de 150 à 200)
+                    
+                    bandeau.style.transform = `translateX(${bandeauOffset}px)`;
+                    frise.style.transform = `translateX(${friseOffset}px)`;
+                }
+            });
+            
+            // Réinitialiser au resize pour gérer le passage mobile/desktop
+            window.addEventListener('resize', function() {
+                if (window.innerWidth <= 768) {
+                    bandeau.style.transform = 'none';
+                    frise.style.transform = 'none';
+                }
+            });
+        }
+    });
+    </script>
 
     <!-- MODALE GUIDE D'ARBITRAGE -->
     <div class="arbitrage-modal-overlay" id="arbitrage-modal-overlay">
@@ -1193,9 +2140,334 @@ margin-top:10px; width:100%;">
         </div>
     </div>
 
+    <!-- JavaScript pour la modale carte -->
+    <script>
+    // La fonction flipCarte est définie dans js/main.js
+    // La fonction closeModal a été modifiée dans js/main.js pour reset le flip
+    </script>
 
+    <!-- JavaScript pour la modale Guide d'Arbitrage -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // === MODALE GUIDE D'ARBITRAGE ===
+        const btnArbitrage = document.getElementById('btn-arbitrage-guide');
+        const arbitrageOverlay = document.getElementById('arbitrage-modal-overlay');
+        const arbitrageCloseBtn = document.querySelector('.arbitrage-modal-close');
+        
+        // Ouverture
+        if (btnArbitrage && arbitrageOverlay) {
+            btnArbitrage.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                arbitrageOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                console.log('Modale arbitrage ouverte');
+            });
+        } else {
+            console.log('Bouton ou overlay non trouvé', btnArbitrage, arbitrageOverlay);
+        }
+        
+        // Fermeture bouton X
+        if (arbitrageCloseBtn) {
+            arbitrageCloseBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                arbitrageOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+        
+        // Fermeture clic extérieur
+        if (arbitrageOverlay) {
+            arbitrageOverlay.addEventListener('click', function(e) {
+                if (e.target === arbitrageOverlay) {
+                    arbitrageOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        }
+        
+        // Fermeture touche Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && arbitrageOverlay && arbitrageOverlay.classList.contains('active')) {
+                arbitrageOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+    
+    // ============================================
+    // GESTION "ME PRÉVENIR" - SORTIE JEUX
+    // ============================================
 
-    <script src="js/interactions.js?v=20260313" defer></script>
+    const notifyGameNames = {
+      'jdc': 'Jérusalem du Ciel',
+      'moh': 'Minhag ou Halakha'
+    };
+
+    const notifyGameDescriptions = {
+      'jdc': 'le jeu de plateau qui permet de traverser 3000 ans d\'histoire juive en famille',
+      'moh': 'le jeu qui permet de distinguer la loi religieuse de la coutume'
+    };
+
+    function openNotifyModal(gameId) {
+      const gameName = notifyGameNames[gameId];
+      const gameDesc = notifyGameDescriptions[gameId];
+      if (!gameName) return;
+      
+      // Fermer les modales ouvertes si nécessaire
+      const openModals = document.querySelectorAll('.modal.active, .content-discovery-overlay.active, [class*="modal"][style*="display: block"]');
+      openModals.forEach(modal => {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      });
+      document.body.classList.remove('modal-open', 'no-scroll');
+      
+      // Trouver la section contact/newsletter
+      const targetSection = document.querySelector('#contact, #newsletter, #restez-informes, #communaute, [id*="contact"], [id*="newsletter"]');
+      
+      if (targetSection) {
+        setTimeout(() => {
+          targetSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      }
+      
+      // Trouver le textarea
+      const messageField = document.querySelector('textarea[name="message"], textarea#message, .contact-form textarea, form textarea, #contact textarea');
+      
+      if (messageField) {
+        // Déterminer le message en fonction du jeu
+        let prefilledMessage;
+        if (gameId === 'moh') {
+          prefilledMessage = `Bonjour,
+
+Je souhaite être informé(e) dès la sortie du jeu 
+Minhag ou Halakha (prévu été 2026).
+
+📌 Jeu : Minhag ou Halakha
+🎯 Objectif : Distinguer la loi religieuse de la coutume
+📅 Sortie prévue : Été 2026
+
+[Votre message ou question ici]
+
+Merci !`;
+        } else {
+          prefilledMessage = `Bonjour,
+
+Je souhaite être informé(e) dès la sortie du jeu 
+Jérusalem du Ciel (prévu hiver 2026).
+
+📌 Jeu : Jérusalem du Ciel
+🎯 Objectif : Traverser 3000 ans d'histoire juive en famille
+📅 Sortie prévue : Hiver 2026
+
+[Votre message ou question ici]
+
+Merci !`;
+        }
+        
+        messageField.value = prefilledMessage;
+        
+        setTimeout(() => {
+          messageField.focus();
+          const placeholder = '[Votre message ou question ici]';
+          const startPos = prefilledMessage.indexOf(placeholder);
+          const endPos = startPos + placeholder.length;
+          if (startPos > -1) {
+            messageField.setSelectionRange(startPos, endPos);
+          }
+        }, 600);
+      }
+      
+      // Ajouter champ caché pour Formspree
+      const form = messageField ? messageField.closest('form') : document.querySelector('form[action*="formspree"], #contact form, .contact-form');
+      if (form) {
+        // Pré-sélectionner \"Vous êtes\" sur Particulier si vide
+        const userTypeSelect = form.querySelector('#user-type, select[name=\"user_type\"]');
+        if (userTypeSelect && !userTypeSelect.value) {
+          userTypeSelect.value = 'particulier';
+        }
+
+        let hiddenField = form.querySelector('input[name="jeu_interesse"]');
+        if (!hiddenField) {
+          hiddenField = document.createElement('input');
+          hiddenField.type = 'hidden';
+          hiddenField.name = 'jeu_interesse';
+          form.appendChild(hiddenField);
+        }
+        hiddenField.value = gameName;
+        
+        // Ajouter champ sujet pour Formspree (_subject)
+        let subjectField = form.querySelector('input[name="_subject"]');
+        if (!subjectField) {
+          subjectField = document.createElement('input');
+          subjectField.type = 'hidden';
+          subjectField.name = '_subject';
+          form.appendChild(subjectField);
+        }
+        subjectField.value = gameId === 'moh' 
+          ? 'Demande d\'information pour Minhag ou Halakha'
+          : `Demande d'information pour ${gameName}`;
+        
+        // Afficher bannière de confirmation
+        let confirmBanner = form.querySelector('.notify-confirm-banner');
+        if (!confirmBanner) {
+          confirmBanner = document.createElement('div');
+          confirmBanner.className = 'notify-confirm-banner';
+          confirmBanner.innerHTML = '<span class="confirm-icon">✨</span><span>Demande d\'information pour <strong></strong></span>';
+          form.insertBefore(confirmBanner, form.firstChild);
+        }
+        confirmBanner.querySelector('strong').textContent = gameName;
+        confirmBanner.style.display = 'flex';
+      }
+    }
+
+    // Gestion des clics sur les boutons "Me prévenir"
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.btn-notify[data-game]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const gameId = this.dataset.game;
+          if (gameId) {
+            openNotifyModal(gameId);
+          }
+        });
+      });
+      
+      // Vérifier si paramètre ?notify= dans l'URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const notifyGame = urlParams.get('notify');
+      if (notifyGame && notifyGameNames[notifyGame]) {
+        setTimeout(() => openNotifyModal(notifyGame), 500);
+      }
+    });
+    </script>
+
+    <!-- Carrousel Feuilleter les pages (La Parole Transmise - Lumières d'Israël) — show/hide -->
+    <script>
+    // === CARROUSEL FEUILLETER LES PAGES (SHOW/HIDE) ===
+    var currentBookSlide = 0;
+    var TOTAL_BOOK_SLIDES = 5;
+
+    function changeBookSlide(direction) {
+        currentBookSlide = (currentBookSlide + direction + TOTAL_BOOK_SLIDES) % TOTAL_BOOK_SLIDES;
+        showBookSlide();
+    }
+
+    function goToBookSlide(index) {
+        currentBookSlide = index;
+        showBookSlide();
+    }
+
+    function showBookSlide() {
+        var slides = document.querySelectorAll('#book-carousel .book-slide');
+        for (var i = 0; i < slides.length; i++) {
+            slides[i].style.display = 'none';
+        }
+        if (slides[currentBookSlide]) {
+            slides[currentBookSlide].style.display = 'block';
+        }
+        var dots = document.querySelectorAll('#modal-carte-apercu .book-dot');
+        for (var j = 0; j < dots.length; j++) {
+            dots[j].style.background = (j === currentBookSlide) ? '#D4A94A' : '#ccc';
+        }
+        var counter = document.getElementById('book-counter');
+        if (counter) {
+            counter.textContent = (currentBookSlide + 1) + ' / ' + TOTAL_BOOK_SLIDES;
+        }
+    }
+
+    // === LIGHTBOX ZOOM POUR FEUILLETER LES PAGES ===
+    var lightboxZoomed = false;
+
+    function openBookLightbox(src, alt) {
+        var lightbox = document.getElementById('book-lightbox');
+        var img = document.getElementById('lightbox-img');
+        if (!lightbox || !img) return;
+        img.src = src;
+        img.alt = alt || 'Zoom';
+        img.style.width = '90%';
+        lightboxZoomed = false;
+        img.style.cursor = 'zoom-in';
+        lightbox.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeBookLightbox() {
+        var lightbox = document.getElementById('book-lightbox');
+        if (lightbox) {
+            lightbox.style.display = 'none';
+        }
+        document.body.style.overflow = '';
+        lightboxZoomed = false;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var closeBtn = document.getElementById('lightbox-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeBookLightbox();
+            });
+        }
+
+        var lightbox = document.getElementById('book-lightbox');
+        if (lightbox) {
+            lightbox.addEventListener('click', function(e) {
+                if (e.target === lightbox) {
+                    closeBookLightbox();
+                }
+            });
+        }
+
+        var img = document.getElementById('lightbox-img');
+        if (img) {
+            img.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (lightboxZoomed) {
+                    img.style.width = '90%';
+                    img.style.cursor = 'zoom-in';
+                    lightboxZoomed = false;
+                    if (lightbox) {
+                        lightbox.scrollTop = 0;
+                        lightbox.scrollLeft = 0;
+                    }
+                } else {
+                    img.style.width = '180%';
+                    img.style.cursor = 'zoom-out';
+                    lightboxZoomed = true;
+                }
+            });
+        }
+
+        if (lightbox) {
+            lightbox.addEventListener('wheel', function(e) {
+                if (lightbox.style.display === 'block') {
+                    e.preventDefault();
+                    var lbImg = document.getElementById('lightbox-img');
+                    if (!lbImg) return;
+                    var currentWidth = parseFloat(lbImg.style.width) || 90;
+                    if (e.deltaY < 0) {
+                        currentWidth = Math.min(currentWidth + 15, 300);
+                    } else {
+                        currentWidth = Math.max(currentWidth - 15, 50);
+                    }
+                    lbImg.style.width = currentWidth + '%';
+                    lbImg.style.cursor = currentWidth > 95 ? 'zoom-out' : 'zoom-in';
+                    lightboxZoomed = currentWidth > 95;
+                }
+            }, { passive: false });
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            var lightbox = document.getElementById('book-lightbox');
+            if (lightbox && lightbox.style.display === 'block') {
+                closeBookLightbox();
+            }
+        }
+    });
+    </script>
 
     <!-- LIGHTBOX ZOOM PLEIN ÉCRAN -->
     <div id="book-lightbox" style="
