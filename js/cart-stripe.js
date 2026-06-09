@@ -13,44 +13,13 @@
     // Produits avec priceId Stripe
     // IMPORTANT: Les clés DOIVENT correspondre exactement aux productId utilisés dans addToCart()
     const products = {
-        jdc: {
-            id: 'jdc',
-            name: 'Jérusalem du Ciel',
-            price: 39.90,
-            priceId: 'price_1SBf5wL4ecjfMIxOm0nbZ5sp',
-            image: './images/jdc_picto_arrondi.png',
-            available: false
-        },
-        moh: {
-            id: 'moh',
-            name: 'Minhag ou Halakha',
-            price: 19.90,
-            priceId: 'price_1SBf6vL4ecjfMIxOYXAbWfh8',
-            image: './images/moh_picto_arrondi.png',
-            available: true
-        },
-        poz: {
-            id: 'poz',
-            name: 'Poztamitsvah',
-            price: 19.90,
-            priceId: 'price_1SBf7lL4ecjfMIxOKuRj4czs',
-            image: './images/poz_picto_arrondi.png',
-            available: false
-        },
         lumieres: {
             id: 'lumieres',
             name: 'La Parole Transmise - Lumières d\'Israël',
             price: 39.90,
-            priceId: 'price_1Scn6GL4ecjfMIxOPxaM9FMl', // TODO: mettre à jour le priceId Stripe pour 39.90€
+            priceId: 'price_1TBx07LLfYKjr3rUGkvFpLOf',
             image: './images/mockup_boite_serie1_recto.png',
             available: true
-        },
-        pack: {
-            id: 'pack',
-            name: 'Pack Complet Ora Shel Torah',
-            price: 79.90,
-            priceId: null, // TODO: Ajouter le priceId Stripe pour le pack
-            image: './images/pack-3d.png'
         }
     };
     
