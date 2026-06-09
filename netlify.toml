@@ -48,46 +48,6 @@
     Referrer-Policy = "strict-origin-when-cross-origin"
 
 # ========================================
-# AUTORISATION IFRAME POUR LES ANIMATIONS
-# ========================================
-# Autoriser l'embedding des animations dans des iframes
-# Ces règles sont plus spécifiques et surchargent la règle générale ci-dessus
-[[headers]]
-  for = "/animations/*"
-  
-  [headers.values]
-    # Autoriser l'embedding depuis le même domaine et les sous-domaines
-    X-Frame-Options = "SAMEORIGIN"
-    
-    # Politique de sécurité pour les iframes (autorise orasheltorah.fr et ses sous-domaines)
-    Content-Security-Policy = "frame-ancestors 'self' https://orasheltorah.fr https://*.orasheltorah.fr"
-    
-    # Autoriser les requêtes cross-origin (CORS)
-    Access-Control-Allow-Origin = "*"
-    
-    # Conserver les autres headers de sécurité
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-
-# Configuration spécifique pour l'animation JDC
-[[headers]]
-  for = "/animations/jdc/*"
-  
-  [headers.values]
-    # Autoriser l'embedding depuis le même domaine et les sous-domaines
-    X-Frame-Options = "SAMEORIGIN"
-    
-    # Politique de sécurité pour les iframes
-    Content-Security-Policy = "frame-ancestors 'self' https://orasheltorah.fr https://*.orasheltorah.fr"
-    
-    # Autoriser les requêtes cross-origin (CORS)
-    Access-Control-Allow-Origin = "*"
-    
-    # Conserver les autres headers de sécurité
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-
-# ========================================
 # HEADERS DE CACHE
 # ========================================
 # Cache long terme pour les images (1 an)
