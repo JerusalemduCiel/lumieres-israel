@@ -140,3 +140,6 @@ dist
 
 *.mp4
 videos/*.mp4
+
+# Backups locaux (ne pas tracker, on garde l'historique git)
+backups/
