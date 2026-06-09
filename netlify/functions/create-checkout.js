@@ -1,6 +1,27 @@
 const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// ---------------------------------------------------------------------------
+// Parole Transmise — configuration produit unique
+// Cette boutique ne vend QUE « La Parole Transmise — Lumières d'Israël ».
+// Toute autre référence est rejetée par isParoleTransmise() ci-dessous.
+// ---------------------------------------------------------------------------
+const PT_PRICE_ID        = 'price_1TBx07LLfYKjr3rUGkvFpLOf';
+const PT_LEGACY_PRICE_ID = 'price_1Scn6GL4ecjfMIxOPxaM9FMl';
+const PT_PRODUCT_KEY     = 'lumieres';
+const PT_PRODUCT_NAME    = "La Parole Transmise - Lumières d'Israël";
+
+function isParoleTransmise(item) {
+  if (!item) return false;
+  return (
+    item.priceId   === PT_PRICE_ID        ||
+    item.priceId   === PT_LEGACY_PRICE_ID ||
+    item.id        === PT_PRODUCT_KEY     ||
+    item.productId === PT_PRODUCT_KEY     ||
+    item.name      === PT_PRODUCT_NAME
+  );
+}
+
 exports.handler = async (event) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -35,60 +56,25 @@ exports.handler = async (event) => {
       throw new Error('STRIPE_SECRET_KEY manquante dans les variables d\'environnement');
     }
 
-    // Vérifier que les produits demandés sont disponibles
-    const unavailableProducts = [];
-    const priceMap = {
-      'price_1SBf5wL4ecjfMIxOm0nbZ5sp': 'jdc',
-      'price_1SBf6vL4ecjfMIxOYXAbWfh8': 'moh',
-      'price_1SBf7lL4ecjfMIxOKuRj4czs': 'poz'
-    };
-    
-    const requestedProducts = items.map(item => priceMap[item.priceId]).filter(Boolean);
-    const hasUnavailable = requestedProducts.some(p => unavailableProducts.includes(p));
-
-    if (hasUnavailable) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ 
-          error: 'Certains produits ne sont pas encore disponibles. Sortie prévue : Printemps 2026.'
-        })
-      };
+    // Validation stricte : cette boutique ne vend QUE « La Parole Transmise ».
+    if (!Array.isArray(items) || items.length === 0) {
+      throw new Error('Panier vide : aucun article reçu.');
+    }
+    for (const item of items) {
+      if (!isParoleTransmise(item)) {
+        throw new Error('Produit non autorisé : cette boutique ne vend que La Parole Transmise');
+      }
     }
 
-    // Calculer poids total estimé (pour metadata uniquement)
-    // Estimation simple : ~1 kg par article
+    // Poids total estimé (metadata only) : ~1 kg par article
     const totalItems = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
     const totalWeight = totalItems * 1.0;
 
-    // Frais de port fixes Colissimo
-    const shippingCost = 7.59;
-
-    // Line items Stripe
-    const lineItems = items.map(item => {
-      if (
-        item.priceId === 'price_1Scn6GL4ecjfMIxOPxaM9FMl' ||
-        item.id === 'lumieres' ||
-        item.productId === 'lumieres' ||
-        item.name === 'La Parole Transmise - Lumières d\'Israël'
-      ) {
-        return {
-          price_data: {
-            currency: 'eur',
-            product_data: {
-              name: item.name || 'La Parole Transmise - Lumières d\'Israël'
-            },
-            unit_amount: 3990
-          },
-          quantity: item.quantity || 1
-        };
-      }
-
-      return {
-        price: item.priceId,
-        quantity: item.quantity || 1
-      };
-    });
+    // Line items Stripe : toujours le price ID PT, peu importe ce que le client envoie.
+    const lineItems = items.map(item => ({
+      price: PT_PRICE_ID,
+      quantity: item.quantity || 1
+    }));
 
     const shippingMethod = body.shipping_method || 'colissimo';
 
@@ -170,8 +156,7 @@ exports.handler = async (event) => {
         relay_id: relay_id || '',
         shipping_method: shipping_method || 'colissimo',
         pickup_store: pickup_store || '',
-        total_weight: totalWeight.toFixed(2),
-        shipping_cost: shippingCost.toFixed(2)
+        total_weight: totalWeight.toFixed(2)
       }
     });
 
