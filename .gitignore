@@ -143,3 +143,6 @@ videos/*.mp4
 
 # Backups locaux (ne pas tracker, on garde l'historique git)
 backups/
+
+# Backup parallèle de fonctions Netlify (code mort, vraie fonction = netlify/functions/)
+netlify/functions_backup/
