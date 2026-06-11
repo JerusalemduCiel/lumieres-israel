@@ -390,7 +390,7 @@ img {
 
     /* Panier + Précommander : restent sur la première ligne */
     .site-header .header-actions {
-        display: flex !important;
+        display: none !important;
         align-items: center !important;
         gap: 8px !important;
         flex-shrink: 0 !important;
@@ -399,7 +399,7 @@ img {
 
     /* Liens de navigation : colonne pleine largeur sous le logo */
     .site-header .header-nav {
-        display: flex !important;
+        display: none !important;
         flex-direction: column !important;
         align-items: flex-start !important;
         flex-basis: 100% !important;
@@ -420,12 +420,14 @@ img {
 
     /* Menu burger / panneau latéral : inutiles si la nav est dans le header */
     .site-header .burger-menu {
-        display: none !important;
+        display: flex !important;
     }
 
-    .mobile-nav,
-    .mobile-nav.active {
+    .mobile-nav {
         display: none !important;
+    }
+    .mobile-nav.active {
+        display: block !important;
     }
     
     /* Cart icon */
