@@ -1,27 +1,38 @@
 /* js/feuilleter.js — "Feuilleter le livre" : aperçu façon livre feuilletable.
-   Gabarit unique copiable dans les 4 sites. Lit les pages simples depuis
-   /animation/images/page1.jpg, page2.jpg … (auto-détection du nombre).
-   page1 = 1re de couverture, dernière = 4e de couverture (affichées seules).
-   Déclencheur : tout élément portant l'attribut data-feuilleter.
-   Drop-in autonome : charge StPageFlip à la demande + injecte la modale.
+   Gabarit unique copiable dans les 4 sites. Pages simples dans
+   /animation/images/page1.jpg, page2.jpg … (page1 = couverture, dernière = 4e de couv).
+   Déclencheur : tout élément [data-feuilleter]. Indiquer le nombre de pages via
+   data-pages="24" (recommandé : évite les requêtes 404 de détection). Sans cet
+   attribut, le module auto-détecte (jusqu'à MAX_PAGES). Drop-in autonome :
+   loader immédiat + préchargement parallèle + StPageFlip chargé à la demande.
    Desktop = livre ouvert (2 pages) · Mobile = 1 page · swipe / drag / clic. */
 (function () {
   'use strict';
 
-  var IMG_BASE  = 'animation/images/page';   // → animation/images/page1.jpg, page2.jpg …
+  var IMG_BASE  = 'animation/images/page';
   var IMG_EXT   = '.jpg';
-  var MAX_PAGES = 60;                          // garde-fou
+  var MAX_PAGES = 30;          // borne d'auto-détection si data-pages absent
   var LIB_URL   = 'https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js';
 
-  var overlay, container, pageFlip, srcs = [];
+  var overlay, box, container, pageFlip, srcs = [];
 
-  // ---- détection auto du nombre de pages ----
-  function probe(i, found, done){
-    if (i > MAX_PAGES){ done(found); return; }
-    var img = new Image();
-    img.onload  = function(){ found.push(IMG_BASE + i + IMG_EXT); probe(i+1, found, done); };
-    img.onerror = function(){ done(found); };
-    img.src = IMG_BASE + i + IMG_EXT;
+  // ---- préchargement PARALLÈLE + détection de la séquence contiguë ----
+  function preload(count, done){
+    var max = (count && count > 0) ? count : MAX_PAGES;
+    var res = new Array(max + 1).fill(null), pending = max;
+    for (var i = 1; i <= max; i++){
+      (function(k){
+        var im = new Image();
+        im.onload  = function(){ res[k] = true;  if (--pending === 0) collect(); };
+        im.onerror = function(){ res[k] = false; if (--pending === 0) collect(); };
+        im.src = IMG_BASE + k + IMG_EXT;
+      })(i);
+    }
+    function collect(){
+      var list = [];
+      for (var k = 1; k <= max; k++){ if (res[k]) list.push(IMG_BASE + k + IMG_EXT); else break; }
+      done(list);
+    }
   }
 
   // ---- chargement de la lib StPageFlip ----
@@ -44,10 +55,17 @@
       '.ost-feuill-box{position:relative;}'+
       '.ost-feuill-close{position:absolute;top:-44px;right:0;width:38px;height:38px;border-radius:50%;'+
       'border:none;background:rgba(255,255,255,.14);color:#fff;font-size:24px;line-height:1;cursor:pointer;'+
-      'display:flex;align-items:center;justify-content:center;z-index:2;}'+
+      'display:flex;align-items:center;justify-content:center;z-index:3;}'+
       '.ost-feuill-close:hover{background:rgba(255,255,255,.28);}'+
       '.ost-feuill-hint{position:absolute;bottom:-32px;left:0;right:0;text-align:center;'+
       'color:#cbb88a;font-size:.8rem;letter-spacing:.02em;}'+
+      '.ost-feuill-loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;'+
+      'justify-content:center;gap:14px;color:#cbb88a;font-size:.9rem;min-width:60vw;min-height:60vh;}'+
+      '.ost-feuill-spin{width:42px;height:42px;border:3px solid rgba(201,162,75,.25);'+
+      'border-top-color:#c9a24b;border-radius:50%;animation:ost-spin .8s linear infinite;}'+
+      '@keyframes ost-spin{to{transform:rotate(360deg);}}'+
+      '.ost-feuill-box.loading #ost-feuill-flip,.ost-feuill-box.loading .ost-feuill-hint{visibility:hidden;}'+
+      '.ost-feuill-box:not(.loading) .ost-feuill-loader{display:none;}'+
       '@media (max-width:768px){.ost-feuill-close{top:-42px;}.ost-feuill-hint{bottom:-30px;}}';
     document.head.appendChild(style);
 
@@ -55,12 +73,14 @@
     overlay.className = 'ost-feuill-overlay';
     overlay.setAttribute('aria-hidden','true');
     overlay.innerHTML =
-      '<div class="ost-feuill-box">'+
+      '<div class="ost-feuill-box loading">'+
       '<button class="ost-feuill-close" type="button" aria-label="Fermer">&times;</button>'+
       '<div id="ost-feuill-flip"></div>'+
+      '<div class="ost-feuill-loader"><div class="ost-feuill-spin"></div><span>Chargement du livre…</span></div>'+
       '<div class="ost-feuill-hint">Glissez ou cliquez les bords pour tourner les pages</div>'+
       '</div>';
     document.body.appendChild(overlay);
+    box = overlay.querySelector('.ost-feuill-box');
     container = overlay.querySelector('#ost-feuill-flip');
 
     overlay.querySelector('.ost-feuill-close').addEventListener('click', closeModal);
@@ -71,39 +91,38 @@
   }
 
   // ---- construction du flip-book (reconstruit à chaque ouverture = responsive) ----
-  function buildFlip(done){
+  function buildFlip(){
     if (pageFlip){ try { pageFlip.destroy(); } catch(e){} pageFlip = null; container.innerHTML = ''; }
-    var first = new Image();
-    first.onload = function(){
-      var ratio = (first.naturalWidth / first.naturalHeight) || 0.73;
-      var wide  = window.innerWidth >= 820;          // desktop = 2 pages, mobile = 1 page
-      var shown = wide ? 2 : 1;
-      var availW = window.innerWidth  * (wide ? 0.90 : 0.96);
-      var availH = window.innerHeight * 0.86;
-      var pageH = Math.min(availH, (availW / shown) / ratio);
-      var pageW = pageH * ratio;
-      pageFlip = new St.PageFlip(container, {
-        width: Math.round(pageW),
-        height: Math.round(pageH),
-        size: 'fixed',
-        usePortrait: true,        // bascule auto en 1 page si l'écran est étroit
-        showCover: true,          // 1re et 4e de couverture affichées seules
-        maxShadowOpacity: 0.5,
-        flippingTime: 700,
-        useMouseEvents: true,
-        mobileScrollSupport: true
-      });
-      pageFlip.loadFromImages(srcs);
-      done();
-    };
-    first.onerror = done;
-    first.src = srcs[0];
+    var ratio = 0.726, wide = window.innerWidth >= 820, shown = wide ? 2 : 1;
+    var availW = window.innerWidth  * (wide ? 0.90 : 0.96);
+    var availH = window.innerHeight * 0.86;
+    var pageH = Math.min(availH, (availW / shown) / ratio);
+    var pageW = pageH * ratio;
+    pageFlip = new St.PageFlip(container, {
+      width: Math.round(pageW), height: Math.round(pageH),
+      size: 'fixed', usePortrait: true, showCover: true,
+      maxShadowOpacity: 0.5, flippingTime: 700, useMouseEvents: true, mobileScrollSupport: true
+    });
+    pageFlip.loadFromImages(srcs);
+    // images déjà préchargées → le rendu tombe dans la frame suivante : on dévoile alors
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.classList.remove('loading'); }); });
   }
 
-  function show(){
+  function openModal(count){
+    ensureModal();
+    box.classList.add('loading');
     overlay.classList.add('active');
     overlay.setAttribute('aria-hidden','false');
     document.body.style.overflow = 'hidden';
+    if (srcs.length){ buildFlip(); return; }
+    var libOK = false, imgOK = false;
+    function ready(){
+      if (!libOK || !imgOK) return;
+      if (!srcs.length){ box.querySelector('.ost-feuill-loader span').textContent = 'Aperçu indisponible'; return; }
+      buildFlip();
+    }
+    loadLib(function(){ libOK = true; ready(); });
+    preload(count, function(list){ srcs = list; imgOK = true; ready(); });
   }
   function closeModal(){
     if (!overlay) return;
@@ -111,22 +130,14 @@
     overlay.setAttribute('aria-hidden','true');
     document.body.style.overflow = '';
   }
-  function openModal(){
-    ensureModal();
-    loadLib(function(){
-      if (srcs.length){ buildFlip(show); return; }
-      probe(1, [], function(found){
-        srcs = found;
-        if (!srcs.length){ console.warn('[feuilleter] aucune image trouvée : '+IMG_BASE+'1'+IMG_EXT); return; }
-        buildFlip(show);
-      });
-    });
-  }
 
   function init(){
     var t = document.querySelectorAll('[data-feuilleter]');
     for (var i=0;i<t.length;i++){
-      t[i].addEventListener('click', function(e){ e.preventDefault(); openModal(); });
+      (function(el){
+        var n = parseInt(el.getAttribute('data-pages'), 10) || 0;
+        el.addEventListener('click', function(e){ e.preventDefault(); openModal(n); });
+      })(t[i]);
     }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
