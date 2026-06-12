@@ -862,3 +862,8 @@ img {
 border:1px solid #c9a24b;border-radius:6px;background:transparent;color:#c9a24b;
 font:inherit;letter-spacing:.03em;cursor:pointer;transition:all .2s;}
 .btn-feuilleter:hover{background:#c9a24b;color:#fff;}
+
+/* === Footer assorti au fond du hero (PT — marron) === */
+#main-footer {
+  background: linear-gradient(140deg, #3a2b1c 0%, #221a12 60%, #100b07 100%);
+}
