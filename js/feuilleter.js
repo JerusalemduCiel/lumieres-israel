@@ -1,29 +1,30 @@
 /* js/feuilleter.js — "Feuilleter le livre" : aperçu façon livre feuilletable.
-   Gabarit unique copiable dans les 4 sites. Pages simples dans
+   Gabarit unique copiable sur les 4 sites. Pages simples dans
    /animation/images/page1.jpg, page2.jpg … (page1 = couverture, dernière = 4e de couv).
    Déclencheur : tout élément [data-feuilleter]. Indiquer le nombre de pages via
-   data-pages="24" (recommandé : évite les requêtes 404 de détection). Sans cet
-   attribut, le module auto-détecte (jusqu'à MAX_PAGES). Drop-in autonome :
-   loader immédiat + préchargement parallèle + StPageFlip chargé à la demande.
+   data-pages="22" (recommandé : évite les requêtes 404 de détection). Sans cet
+   attribut, le module auto-détecte (jusqu'à MAX_PAGES). Le ratio de page est lu
+   automatiquement sur la 1re image → fonctionne quel que soit le format du livre.
+   Drop-in autonome : loader immédiat + préchargement parallèle + StPageFlip à la demande.
    Desktop = livre ouvert (2 pages) · Mobile = 1 page · swipe / drag / clic. */
 (function () {
   'use strict';
 
   var IMG_BASE  = 'animation/images/page';
   var IMG_EXT   = '.jpg';
-  var MAX_PAGES = 30;          // borne d'auto-détection si data-pages absent
+  var MAX_PAGES = 40;          // borne d'auto-détection si data-pages absent
   var LIB_URL   = 'https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.js';
 
-  var overlay, box, container, pageFlip, srcs = [];
+  var overlay, box, container, pageFlip, srcs = [], firstRatio = 0;
 
-  // ---- préchargement PARALLÈLE + détection de la séquence contiguë ----
+  // ---- préchargement PARALLÈLE + détection de la séquence contiguë + ratio de page ----
   function preload(count, done){
     var max = (count && count > 0) ? count : MAX_PAGES;
     var res = new Array(max + 1).fill(null), pending = max;
     for (var i = 1; i <= max; i++){
       (function(k){
         var im = new Image();
-        im.onload  = function(){ res[k] = true;  if (--pending === 0) collect(); };
+        im.onload  = function(){ res[k] = true; if (k === 1){ firstRatio = im.naturalWidth / im.naturalHeight; } if (--pending === 0) collect(); };
         im.onerror = function(){ res[k] = false; if (--pending === 0) collect(); };
         im.src = IMG_BASE + k + IMG_EXT;
       })(i);
@@ -93,7 +94,8 @@
   // ---- construction du flip-book (reconstruit à chaque ouverture = responsive) ----
   function buildFlip(){
     if (pageFlip){ try { pageFlip.destroy(); } catch(e){} pageFlip = null; container.innerHTML = ''; }
-    var ratio = 0.726, wide = window.innerWidth >= 820, shown = wide ? 2 : 1;
+    var ratio = firstRatio || 0.7;          // ratio lu sur la 1re image
+    var wide = window.innerWidth >= 820, shown = wide ? 2 : 1;
     var availW = window.innerWidth  * (wide ? 0.90 : 0.96);
     var availH = window.innerHeight * 0.86;
     var pageH = Math.min(availH, (availW / shown) / ratio);
@@ -104,7 +106,6 @@
       maxShadowOpacity: 0.5, flippingTime: 700, useMouseEvents: true, mobileScrollSupport: true
     });
     pageFlip.loadFromImages(srcs);
-    // images déjà préchargées → le rendu tombe dans la frame suivante : on dévoile alors
     requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.classList.remove('loading'); }); });
   }
 
