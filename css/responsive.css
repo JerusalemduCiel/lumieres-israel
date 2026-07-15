@@ -388,13 +388,17 @@ img {
         min-width: 0;
     }
 
-    /* Panier + Précommander : restent sur la première ligne */
+    /* Panier visible sur mobile ; Précommander reste dans le menu burger */
     .site-header .header-actions {
-        display: none !important;
+        display: flex !important;
         align-items: center !important;
         gap: 8px !important;
         flex-shrink: 0 !important;
         order: 2;
+    }
+
+    .site-header .header-actions .btn-precommander {
+        display: none !important;
     }
 
     /* Liens de navigation : colonne pleine largeur sous le logo */
