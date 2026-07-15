@@ -312,25 +312,96 @@
         setTimeout(updateMRWidgetVisibility, 300);
     }
 
+    let mrWidgetDebounceTimer = null;
+    let mrWidgetLastSearchKey = '';
+    let mrWidgetInitialized = false;
+
+    function onMRParcelShopSelected(data) {
+      window.selectedRelay = data;
+      const confirmRelayBtn = document.getElementById('confirm-relay-btn');
+      if (confirmRelayBtn) confirmRelayBtn.style.display = 'block';
+      const container = document.getElementById('mr-widget-container');
+      if (container) {
+        const label = container.querySelector('p');
+        if (label) {
+          label.innerHTML =
+            '✅ Point relais sélectionné : <strong>' +
+            data.Nom + ' — ' + data.Adresse1 +
+            ', ' + data.CP + ' ' + data.Ville + '</strong>';
+        }
+      }
+    }
+
+    function destroyMRWidgetDom() {
+      const zone = document.getElementById('Zone_Widget');
+      if (!zone) return;
+      zone.innerHTML = '';
+      zone.style.display = '';
+      if (window.jQuery) {
+        window.jQuery(zone).off().removeData();
+      }
+    }
+
+    function resetMRWidgetState() {
+      window.selectedRelay = null;
+      mrWidgetLastSearchKey = '';
+      mrWidgetInitialized = false;
+      destroyMRWidgetDom();
+      const confirmRelayBtn = document.getElementById('confirm-relay-btn');
+      if (confirmRelayBtn) confirmRelayBtn.style.display = 'none';
+    }
+
+    function scheduleMRWidgetRefresh() {
+      clearTimeout(mrWidgetDebounceTimer);
+      mrWidgetDebounceTimer = setTimeout(updateMRWidgetVisibility, 350);
+    }
+
+    function isMRWidgetMounted() {
+      const zone = document.getElementById('Zone_Widget');
+      return !!(mrWidgetInitialized && zone && zone.innerHTML.trim());
+    }
+
+    function refreshMRWidgetSearch(postCode, city) {
+      const $zone = window.jQuery('#Zone_Widget');
+      const params = { PostCode: postCode, Country: 'FR' };
+      if (city) params.Ville = city;
+      $zone.trigger('MR_SetParams', params);
+      $zone.trigger('MR_DoSearch', [postCode, 'FR']);
+      $zone.trigger('MR_RebindMap');
+    }
+
     $(document).ready(function() {
-      window.initMRWidget = function(codePostal) {
-        $("#Zone_Widget").MR_ParcelShopPicker({
-          Target: "#SelectedRelay",
-          Brand: "CC23VA2Y",
-          Country: "FR",
-          PostCode: codePostal,
-          ColLivMod: "24R",
-          NbResults: "7",
-          OnParcelShopSelected: function(data) {
-            window.selectedRelay = data;
-            document.getElementById('confirm-relay-btn').style.display = 'block';
-            document.getElementById('mr-widget-container')
-              .querySelector('p').innerHTML =
-              '✅ Point relais sélectionné : <strong>' +
-              data.Nom + ' — ' + data.Adresse1 +
-              ', ' + data.CP + ' ' + data.Ville + '</strong>';
-          }
-        });
+      window.initMRWidget = function(codePostal, ville) {
+        const postCode = String(codePostal || '').trim();
+        const city = String(ville || '').trim();
+        if (postCode.length < 5 || !window.jQuery) return;
+
+        const searchKey = postCode + '|' + city;
+        if (searchKey === mrWidgetLastSearchKey) return;
+
+        mrWidgetLastSearchKey = searchKey;
+        window.selectedRelay = null;
+
+        if (isMRWidgetMounted()) {
+          refreshMRWidgetSearch(postCode, city);
+          return;
+        }
+
+        destroyMRWidgetDom();
+
+        const options = {
+          Target: '#SelectedRelay',
+          Brand: 'CC23VA2Y',
+          Country: 'FR',
+          PostCode: postCode,
+          ColLivMod: '24R',
+          NbResults: '7',
+          OnParcelShopSelected: onMRParcelShopSelected
+        };
+        if (city) options.Ville = city;
+
+        window.jQuery('#Zone_Widget').MR_ParcelShopPicker(options);
+        mrWidgetInitialized = true;
       };
     });
 
@@ -343,19 +414,23 @@
 
     function updateMRWidgetVisibility() {
       const postalInput = document.getElementById('postal') || document.getElementById('customer-zip');
+      const cityInput = document.getElementById('customer-city') || document.getElementById('city');
       const container = document.getElementById('mr-widget-container');
       if (!postalInput || !container) return;
 
       const codePostal = (postalInput.value || '').trim();
-      if (codePostal && isMondialRelaySelected()) {
+      const ville = cityInput ? (cityInput.value || '').trim() : '';
+
+      if (codePostal.length >= 5 && isMondialRelaySelected()) {
         container.style.display = 'block';
         const confirmRelayBtn = document.getElementById('confirm-relay-btn');
-        if (confirmRelayBtn) {
-          confirmRelayBtn.style.display = 'none';
-        }
-        initMRWidget(codePostal);
+        if (confirmRelayBtn) confirmRelayBtn.style.display = 'none';
+        initMRWidget(codePostal, ville);
       } else {
         container.style.display = 'none';
+        if (!isMondialRelaySelected() || codePostal.length < 5) {
+          resetMRWidgetState();
+        }
       }
     }
     
@@ -400,9 +475,16 @@
         const checkoutForm = document.getElementById('checkout-form');
         if (checkoutForm) {
             const postalInput = document.getElementById('postal') || document.getElementById('customer-zip');
+            const cityInput = document.getElementById('customer-city') || document.getElementById('city');
             if (postalInput) {
-                postalInput.addEventListener('input', updateMRWidgetVisibility);
+                postalInput.addEventListener('input', scheduleMRWidgetRefresh);
                 postalInput.addEventListener('change', updateMRWidgetVisibility);
+                postalInput.addEventListener('blur', updateMRWidgetVisibility);
+            }
+            if (cityInput) {
+                cityInput.addEventListener('input', scheduleMRWidgetRefresh);
+                cityInput.addEventListener('change', updateMRWidgetVisibility);
+                cityInput.addEventListener('blur', updateMRWidgetVisibility);
             }
             document.querySelectorAll('input[name="shipping-method"], input[name="delivery-method"], select[name="shipping-method"], select[name="delivery-method"]').forEach((el) => {
                 el.addEventListener('change', updateMRWidgetVisibility);
