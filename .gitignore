@@ -146,3 +146,5 @@ backups/
 
 # Backup parallèle de fonctions Netlify (code mort, vraie fonction = netlify/functions/)
 netlify/functions_backup/
+
+!videos/lpt-rambam.mp4

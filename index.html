@@ -339,6 +339,39 @@
     </nav>
 
     <!-- HERO BIS - La Parole Transmise - Lumières d'Israël (gabarit) -->
+    <section id="video-lpt" class="video-lpt" aria-label="Vidéo : La Parole Transmise">
+      <div class="video-lpt__inner">
+        <div class="video-lpt__texte">
+          <p class="video-lpt__kicker">La Parole Transmise</p>
+          <h2 class="video-lpt__titre">Je ne savais pas<br>qui était Rambam.</h2>
+          <p class="video-lpt__question">Alors j'ai écrit sa vie. Puis celle de 117 autres Sages, d'Adam Harichon à Rav Sacks.</p>
+          <p class="video-lpt__reponse">Édition originale — les derniers exemplaires.</p>
+          <button type="button" class="video-lpt__cta" data-scroll-to="boutique">Commander — 39,90 €</button>
+        </div>
+        <video class="video-lpt__player" controls playsinline preload="metadata" poster="videos/lpt-rambam-poster.jpg">
+          <source src="videos/lpt-rambam.mp4" type="video/mp4">
+        </video>
+      </div>
+    </section>
+    <style>
+      .video-lpt { background: radial-gradient(ellipse 80% 70% at 50% 40%, #3a2b1c 0%, #17110b 75%); padding: 130px 24px 64px; color: #F6EEDD; }
+      .video-lpt__inner { max-width: 1000px; margin: 0 auto; display: flex; align-items: center; gap: 56px; }
+      .video-lpt__texte { flex: 1; }
+      .video-lpt__kicker { font-family: 'Cinzel', serif; letter-spacing: .3em; color: #C9A45C; font-size: .9rem; margin: 0 0 14px; text-transform: uppercase; }
+      .video-lpt__titre { font-family: 'Cormorant Garamond', 'EB Garamond', serif; font-weight: 500; font-size: 2.6rem; line-height: 1.1; margin: 0 0 18px; color: #F6EEDD; }
+      .video-lpt__question { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 1.35rem; color: #C9A45C; margin: 0 0 12px; }
+      .video-lpt__reponse { font-size: 1rem; color: rgba(246,238,221,.8); margin: 0 0 26px; }
+      .video-lpt__cta { font-family: 'Cinzel', serif; letter-spacing: .08em; font-size: 1rem; padding: 14px 28px; color: #1a120a; background: #C9A45C; border: 0; cursor: pointer; }
+      .video-lpt__cta:hover { background: #dbb873; }
+      .video-lpt__player { width: 340px; aspect-ratio: 9 / 16; background: #000; border: 1px solid rgba(201,164,92,.4); box-shadow: 0 30px 60px rgba(0,0,0,.5); flex-shrink: 0; }
+      @media (max-width: 760px) {
+        .video-lpt { padding: 96px 16px 44px; }
+        .video-lpt__inner { flex-direction: column-reverse; gap: 28px; text-align: center; }
+        .video-lpt__player { width: 100%; max-width: 360px; }
+        .video-lpt__titre { font-size: 2rem; }
+      }
+    </style>
+
     <section id="lumieres-israel" class="gabarit gabarit-pt">
       <div class="gabarit-bg"></div>
       <div class="gabarit-watermark">לְדוֹר וָדוֹר</div>
@@ -358,7 +391,7 @@
           </div>
         </div>
         <div class="gabarit-editorial">
-          <p class="collection-label">Lumières d'Israël · Tome I</p>
+          <p class="collection-label">Lumières d'Israël</p>
           <h2 class="gabarit-title">La Parole Transmise</h2>
           <p class="gabarit-subtitle">Les grandes figures de l'histoire juive</p>
           <p class="desc">296 pages consacrées aux 118 figures qui ont façonné 4000 ans d'histoire juive. Des Patriarches aux maîtres contemporains, chaque double page réunit biographie, récit hassidique, paroles marquantes et héritage spirituel — une porte d'entrée pour mettre un visage sur chaque voix, une époque sur chaque parole.</p>
